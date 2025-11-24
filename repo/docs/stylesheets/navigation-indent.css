@@ -1,0 +1,21 @@
+/* MkDocs Material - Navigation Indentation */
+/* Vergrößert die Einrückung von verschachtelten Navigationspunkten */
+
+/* NUR die Untermenü-Punkte einrücken, nicht den übergeordneten Punkt */
+/* Ziel: Navigation -> Übersicht/Implementierung einrücken */
+
+/* Untermenü-Container einrücken */
+.md-nav__item--nested > .md-nav {
+    padding-left: 1.5rem;
+}
+
+/* Optional: Subtiler Border für bessere visuelle Hierarchie */
+.md-nav__item--nested > .md-nav {
+    border-left: 2px solid rgba(0, 0, 0, 0.12);
+    margin-left: 0.5rem;
+}
+
+/* Dark Mode Support */
+[data-md-color-scheme="slate"] .md-nav__item--nested > .md-nav {
+    border-left-color: rgba(255, 255, 255, 0.12);
+}

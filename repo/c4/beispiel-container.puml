@@ -1,0 +1,37 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+LAYOUT_WITH_LEGEND()
+
+title Container Diagram - EMPC4 VIS Stack
+
+Person(user, "Benutzer", "Entwickler, Architekt oder Stakeholder")
+
+System_Boundary(empc4, "EMPC4 VIS Stack") {
+    Container(reverse_proxy, "Reverse Proxy", "Traefik v2.11", "Routing, Service Discovery, TLS-Termination (geplant)")
+    Container(dashboard, "Dashboard", "nginx (Alpine)", "Zentrale Einstiegsseite mit Übersicht aller Services")
+    Container(plantuml, "PlantUML Server", "Java, Jetty", "Rendert UML und C4-Diagramme als PNG/SVG")
+    Container(docs, "Dokumentations-Server", "MkDocs Material", "Statische Dokumentation mit Mermaid-Support")
+    Container(excalidraw, "Whiteboard", "Excalidraw", "Interaktives Zeichentool für Architektur-Workshops")
+}
+
+ContainerDb(repo, "Git Repository", "Filesystem", "Architektur-Inhalte: docs/, c4/, assets/")
+
+' Beziehungen
+Rel(user, reverse_proxy, "Nutzt", "HTTP/HTTPS")
+
+Rel(reverse_proxy, dashboard, "Routet zu", "/ - Priority 1")
+Rel(reverse_proxy, plantuml, "Routet zu", "/plantuml - StripPrefix")
+Rel(reverse_proxy, docs, "Routet zu", "/docs - StripPrefix")
+Rel(reverse_proxy, excalidraw, "Routet zu", "/whiteboard")
+
+Rel(plantuml, repo, "Liest .puml Dateien", "Volume Mount (read-only)")
+Rel(docs, repo, "Liest .md Dateien, Rendert Mermaid", "Volume Mount")
+
+Rel(dashboard, plantuml, "Verlinkt zu")
+Rel(dashboard, docs, "Verlinkt zu")
+Rel(dashboard, excalidraw, "Verlinkt zu")
+
+SHOW_LEGEND()
+
+@enduml

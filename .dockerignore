@@ -1,0 +1,29 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Repo/Dokumentation
+# WICHTIG: repo/ darf NICHT ausgeschlossen werden, da Dockerfile.mkdocs es benötigt!
+# repo/
+
+# Docker
+docker-compose.yml
+
+# Dokumentation und Skripte
+*.md
+*.ps1
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db

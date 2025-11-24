@@ -1,0 +1,39 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+LAYOUT_WITH_LEGEND()
+
+title System Context Diagram - EMPC4 VIS Stack
+
+' Personen
+Person(developer, "Entwickler/Architekt", "Erstellt und pflegt Architektur-Dokumentation mit PlantUML und Markdown")
+Person(stakeholder, "Stakeholder", "Betrachtet und reviewt Architektur-Dokumentation")
+Person(pm, "Projektmanager", "Nutzt Whiteboard für Architektur-Workshops")
+
+' Hauptsystem
+System(empc4, "EMPC4 VIS Stack", "Containerisierte Visualisierungsumgebung für PlantUML, Mermaid und Excalidraw")
+
+' Externe Systeme
+System_Ext(ide, "IDE", "VS Code, IntelliJ mit PlantUML-Plugins für Live-Preview")
+System_Ext(git, "Git Repository", "Versionskontrolle für Architektur-Inhalte (docs, c4, assets)")
+System_Ext(browser, "Web Browser", "Zugriff auf Dokumentation, PlantUML-Server und Whiteboard")
+System_Ext(ci_cd, "CI/CD Pipeline", "GitHub Actions / GitLab CI für automatische Diagramm-Generierung")
+
+' Beziehungen
+Rel(developer, ide, "Erstellt Diagramme in", "PlantUML, Markdown")
+Rel(developer, empc4, "Nutzt für", "Diagramm-Rendering und Dokumentation")
+Rel(developer, git, "Commitet Änderungen zu", "Git Push")
+
+Rel(stakeholder, browser, "Nutzt")
+Rel(pm, browser, "Nutzt")
+Rel(browser, empc4, "Zeigt Dokumentation von", "HTTPS")
+
+Rel(ide, empc4, "Rendert Diagramme via", "HTTP API /plantuml")
+Rel(ci_cd, empc4, "Generiert Diagramme via", "HTTP API")
+
+Rel(empc4, git, "Liest Inhalte von", "Volume Mount")
+Rel(ci_cd, git, "Triggered by Push/Merge")
+
+SHOW_LEGEND()
+
+@enduml

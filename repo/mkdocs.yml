@@ -1,0 +1,100 @@
+site_name: EMPC4 Architektur-Dokumentation
+site_description: Containerisierte Visualisierungsumgebung für PlantUML, Mermaid und Excalidraw
+# WICHTIG: site_url muss leer/root sein, damit MkDocs /assets/ generiert (nicht /docs/assets/)
+# Das post-build sed script im Dockerfile schreibt dann /assets/ zu /docs/assets/ um
+site_url: ''
+# WICHTIG: use_directory_urls muss false sein für korrekte Funktion mit Traefik PathPrefix
+use_directory_urls: false
+
+theme:
+  name: material
+  language: de
+  palette:
+    # Palette toggle for light mode
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    # Palette toggle for dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+
+plugins:
+  - search:
+      lang: de
+  - mermaid2:
+      arguments:
+        theme: |
+          ^(JSON.parse(__md_get("__palette").index == 1)) ? 'dark' : 'light'
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+
+docs_dir: docs
+
+nav:
+  - Home: index.md
+  - Architektur:
+    - Übersicht: architecture/overview.md
+    - C4-Diagramme: architecture/c4-diagrams.md
+  - Kroki:
+    - Übersicht & Anwendungsbeispiele: kroki.md
+  - Beispiele:
+    - Mermaid: examples/mermaid.md
+    - PlantUML: examples/plantuml.md
+  - Setup:
+    - Navigation:
+      - Übersicht: setup/navigation.md
+      - Implementierung: setup/navigation-implementierung.md
+    - Docker Befehle: setup/docker-befehle.md
+    - MkDocs Anleitung: setup/mkdocs-usage.md
+    - Features:
+      - Speichern & Öffnen von Mermaid .mmd Dateien: features/mermaid_save_load_features.md
+      - Golable Navigation: 
+        - Übersicht: setup/navigation.md
+        - Implementierung: setup/navigation-implementierung.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/JoZapf/EMPC4-containerized-visualization-environment
+
+extra_css:
+  - stylesheets/global-nav.css
+  - stylesheets/navigation-indent.css
+
+extra_javascript:
+  - javascripts/global-nav.js

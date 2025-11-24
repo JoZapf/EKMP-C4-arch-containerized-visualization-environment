@@ -1,0 +1,276 @@
+services:
+  reverse-proxy:
+    image: traefik:v2.11
+    container_name: empc4_reverse_proxy
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--accesslog=true"
+      - "--log.level=INFO"
+    ports:
+      - "${HTTP_PORT:-80}:80"
+      # Traefik Dashboard: Siehe traefik-dashboard Service (Port 8090)
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+      - empc4_net
+    restart: unless-stopped
+
+  # Traefik Dashboard Proxy with Global Navigation
+  traefik-dashboard:
+    build:
+      context: .
+      dockerfile: ./traefik-proxy/Dockerfile
+    image: empc4-traefik-dashboard:latest
+    container_name: empc4_traefik_dashboard
+    depends_on:
+      - reverse-proxy
+    ports:
+      - "${TRAEFIK_DASHBOARD_PORT:-8090}:80"  # Port 8090 statt 8080
+    networks:
+      - empc4_net
+    restart: on-failure:3
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:80/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  dashboard:
+    image: nginx:stable-alpine
+    container_name: empc4_dashboard
+    volumes:
+      - ./dashboard/dist:/usr/share/nginx/html:ro
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dashboard.rule=Host(`${ARCH_BASE_DOMAIN}`) && PathPrefix(`/`)"
+      - "traefik.http.routers.dashboard.entrypoints=web"
+      - "traefik.http.routers.dashboard.priority=1"
+    networks:
+      - empc4_net
+    restart: on-failure:3
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:80/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # PlantUML Backend (not exposed to Traefik directly)
+  plantuml-backend:
+    image: plantuml/plantuml-server:jetty
+    container_name: empc4_plantuml_backend
+    environment:
+      - PLANTUML_LIMIT_SIZE=8192
+      - BASE_URL=uml
+    volumes:
+      - "${ARCH_REPO_PATH:-./repo}:/repo:ro"
+    networks:
+      - empc4_net
+    restart: on-failure:5
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080/uml/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # PlantUML Proxy with Global Navigation
+  plantuml:
+    build:
+      context: .
+      dockerfile: ./plantuml-proxy/Dockerfile
+    image: empc4-plantuml-proxy:latest
+    container_name: empc4_plantuml_proxy
+    depends_on:
+      - plantuml-backend
+    labels:
+      - "traefik.enable=true"
+      # Router für /plantuml Pfad
+      - "traefik.http.routers.plantuml.rule=Host(`${ARCH_BASE_DOMAIN}`) && PathPrefix(`/plantuml`)"
+      - "traefik.http.routers.plantuml.entrypoints=web"
+      - "traefik.http.routers.plantuml.priority=10"
+      # Strip /plantuml und füge /uml hinzu (da PlantUML auf /uml Context läuft)
+      - "traefik.http.middlewares.plantuml-stripprefix.stripprefix.prefixes=/plantuml"
+      - "traefik.http.middlewares.plantuml-addprefix.addprefix.prefix=/uml"
+      - "traefik.http.routers.plantuml.middlewares=plantuml-stripprefix,plantuml-addprefix"
+      # Zusätzlicher Router für /uml Pfad (PlantUML generiert intern Links mit /uml/)
+      - "traefik.http.routers.plantuml-uml.rule=Host(`${ARCH_BASE_DOMAIN}`) && PathPrefix(`/uml`)"
+      - "traefik.http.routers.plantuml-uml.entrypoints=web"
+      - "traefik.http.routers.plantuml-uml.priority=10"
+      # KEIN stripprefix für /uml - PlantUML erwartet diese Pfade intern!
+      # Service-Definition (für beide Router)
+      - "traefik.http.services.plantuml.loadbalancer.server.port=80"
+    networks:
+      - empc4_net
+    restart: on-failure:3
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:80/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  docs:
+    build:
+      context: .
+      dockerfile: Dockerfile.mkdocs
+    image: empc4-mkdocs-material:latest
+    container_name: empc4_docs
+    # Kein volume mount - site wird während build erstellt
+    labels:
+      - "traefik.enable=true"
+      # Router für /docs Pfad
+      - "traefik.http.routers.docs.rule=Host(`${ARCH_BASE_DOMAIN}`) && PathPrefix(`/docs`)"
+      - "traefik.http.routers.docs.entrypoints=web"
+      - "traefik.http.routers.docs.priority=10"
+      # StripPrefix für /docs (analog zu Excalidraw)
+      # HTML enthält /docs/ prefix in asset paths (durch post-build rewrite)
+      - "traefik.http.middlewares.docs-stripprefix.stripprefix.prefixes=/docs"
+      - "traefik.http.routers.docs.middlewares=docs-stripprefix"
+      # Service-Definition
+      - "traefik.http.services.docs.loadbalancer.server.port=80"
+    networks:
+      - empc4_net
+    restart: on-failure:5
+    healthcheck:
+      # nginx receives requests without /docs/ prefix (Traefik strips it)
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:80/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Excalidraw - Collaborative Whiteboard
+  excalidraw:
+    build:
+      context: .
+      dockerfile: ./excalidraw/Dockerfile
+    image: empc4-excalidraw:latest
+    container_name: empc4_excalidraw
+    labels:
+      - "traefik.enable=true"
+      # Router für /whiteboard Pfad
+      - "traefik.http.routers.excalidraw.rule=Host(`${ARCH_BASE_DOMAIN}`) && PathPrefix(`/whiteboard`)"
+      - "traefik.http.routers.excalidraw.entrypoints=web"
+      - "traefik.http.routers.excalidraw.priority=10"
+      # StripPrefix für /whiteboard
+      - "traefik.http.middlewares.excalidraw-stripprefix.stripprefix.prefixes=/whiteboard"
+      - "traefik.http.routers.excalidraw.middlewares=excalidraw-stripprefix"
+      # Service-Definition
+      - "traefik.http.services.excalidraw.loadbalancer.server.port=80"
+    networks:
+      - empc4_net
+    restart: on-failure:3
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:80/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Mermaid Live Editor - Interactive Mermaid Diagram Editor
+  mermaid-live:
+    build:
+      context: .
+      dockerfile: ./mermaid-live/Dockerfile
+    image: empc4-mermaid-live:latest
+    container_name: empc4_mermaid_live
+    labels:
+      - "traefik.enable=true"
+      # Router für /mermaid Pfad
+      - "traefik.http.routers.mermaid.rule=Host(`${ARCH_BASE_DOMAIN}`) && PathPrefix(`/mermaid`)"
+      - "traefik.http.routers.mermaid.entrypoints=web"
+      - "traefik.http.routers.mermaid.priority=10"
+      # KEIN StripPrefix! SvelteKit ist mit base: '/mermaid' gebaut
+      # nginx empfängt Requests mit /mermaid Prefix
+      # Service-Definition
+      - "traefik.http.services.mermaid.loadbalancer.server.port=80"
+    networks:
+      - empc4_net
+    restart: on-failure:3
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:80/mermaid/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Kroki Frontend - Landing page with API proxy
+  kroki:
+    image: nginx:stable-alpine
+    container_name: empc4_kroki
+    volumes:
+      - ./kroki-frontend:/usr/share/nginx/html:ro
+      - ./kroki-frontend/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    labels:
+      - "traefik.enable=true"
+      # Router für /kroki Pfad
+      - "traefik.http.routers.kroki.rule=Host(`${ARCH_BASE_DOMAIN}`) && PathPrefix(`/kroki`)"
+      - "traefik.http.routers.kroki.entrypoints=web"
+      - "traefik.http.routers.kroki.priority=10"
+      # StripPrefix für /kroki
+      - "traefik.http.middlewares.kroki-stripprefix.stripprefix.prefixes=/kroki"
+      - "traefik.http.routers.kroki.middlewares=kroki-stripprefix"
+      # Service-Definition
+      - "traefik.http.services.kroki.loadbalancer.server.port=80"
+    networks:
+      - empc4_net
+    restart: on-failure:3
+    depends_on:
+      - kroki-backend
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:80/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Kroki Backend - Universal Diagram Service (PlantUML, Mermaid, GraphViz, C4, BPMN, etc.)
+  kroki-backend:
+    image: yuzutech/kroki:latest
+    container_name: empc4_kroki_backend
+    environment:
+      - KROKI_BLOCKDIAG_HOST=kroki-blockdiag
+      - KROKI_MERMAID_HOST=kroki-mermaid
+      - KROKI_BPMN_HOST=kroki-bpmn
+    networks:
+      - empc4_net
+    restart: on-failure:3
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:8000/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # Kroki companion service for BlockDiag diagrams
+  kroki-blockdiag:
+    image: yuzutech/kroki-blockdiag:latest
+    container_name: empc4_kroki_blockdiag
+    networks:
+      - empc4_net
+    restart: on-failure:3
+
+  # Kroki companion service for Mermaid diagrams
+  kroki-mermaid:
+    image: yuzutech/kroki-mermaid:latest
+    container_name: empc4_kroki_mermaid
+    networks:
+      - empc4_net
+    restart: on-failure:3
+
+  # Kroki companion service for BPMN diagrams
+  kroki-bpmn:
+    image: yuzutech/kroki-bpmn:latest
+    container_name: empc4_kroki_bpmn
+    networks:
+      - empc4_net
+    restart: on-failure:3
+
+networks:
+  empc4_net:
+    driver: bridge

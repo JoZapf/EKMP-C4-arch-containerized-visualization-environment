@@ -1,0 +1,53 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+LAYOUT_WITH_LEGEND()
+
+title Component Diagram - Traefik Reverse Proxy
+
+Container_Boundary(traefik, "Traefik Reverse Proxy") {
+    Component(entrypoints, "Entrypoints", "HTTP/HTTPS", "Eingehende Verbindungen auf Port 80/443")
+    Component(router, "Router", "HTTP Router", "URL-basiertes Routing mit PathPrefix und Host")
+    Component(middleware, "Middlewares", "HTTP Middleware", "StripPrefix, Auth, RateLimit, CORS")
+    Component(loadbalancer, "Load Balancer", "Service LB", "Verteilt Requests an Container")
+    Component(provider, "Docker Provider", "Service Discovery", "Liest Docker Labels für dynamische Konfiguration")
+    Component(dashboard_ui, "Dashboard", "Web UI", "Monitoring und Verwaltung auf Port 8080")
+}
+
+Container_Ext(docker, "Docker Engine", "Container Runtime", "Stellt Services bereit")
+Container_Ext(services, "Backend Services", "Dashboard, PlantUML, Docs, Excalidraw", "Eigentliche Services")
+
+' Beziehungen innerhalb Traefik
+Rel(entrypoints, router, "Leitet Request weiter")
+Rel(router, middleware, "Wendet Middlewares an")
+Rel(middleware, loadbalancer, "Verarbeitet Request")
+Rel(loadbalancer, services, "Forwarded zu", "Docker Network")
+
+Rel(provider, docker, "Überwacht Container", "Docker Socket (read-only)")
+Rel(provider, router, "Registriert Routen", "Docker Labels")
+Rel(provider, loadbalancer, "Registriert Services")
+
+Rel(dashboard_ui, router, "Zeigt Routen an")
+Rel(dashboard_ui, loadbalancer, "Zeigt Services an")
+Rel(dashboard_ui, middleware, "Zeigt Middlewares an")
+
+' Beispiel-Konfiguration
+note right of router
+  Router-Beispiel:
+  - Rule: Host(`arch.local`) && PathPrefix(`/plantuml`)
+  - Entrypoint: web
+  - Middlewares: plantuml-stripprefix
+  - Service: plantuml
+end note
+
+note right of middleware
+  StripPrefix-Middleware:
+  - Entfernt /plantuml aus URL
+  - /plantuml/png/xyz → /png/xyz
+
+  Wichtig für Backend-Kompatibilität!
+end note
+
+SHOW_LEGEND()
+
+@enduml

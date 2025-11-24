@@ -1,0 +1,50 @@
+# Stage 1: Build documentation
+FROM squidfunk/mkdocs-material:latest AS builder
+
+# Installiere Mermaid-Plugin
+RUN python -m pip install --no-cache-dir mkdocs-mermaid2-plugin
+
+# Copy project files
+WORKDIR /docs
+COPY repo /docs
+
+# Build static site
+RUN mkdocs build
+
+# Post-build: Rewrite asset paths to include /docs/ prefix
+# This is necessary because MkDocs Material doesn't have a --base option like Vite
+# IMPORTANT: MkDocs generates RELATIVE paths (href="assets/...") not absolute (href="/assets/...")
+# We need to rewrite relative paths to absolute paths with /docs/ prefix
+RUN find /docs/site -type f -name "*.html" -exec sed -i \
+    -e 's|href="assets/|href="/docs/assets/|g' \
+    -e 's|src="assets/|src="/docs/assets/|g' \
+    -e 's|href="stylesheets/|href="/docs/stylesheets/|g' \
+    -e 's|src="stylesheets/|src="/docs/stylesheets/|g' \
+    -e 's|href="javascripts/|href="/docs/javascripts/|g' \
+    -e 's|src="javascripts/|src="/docs/javascripts/|g' \
+    -e 's|href="images/|href="/docs/images/|g' \
+    -e 's|src="images/|src="/docs/images/|g' \
+    -e 's|href="/assets/|href="/docs/assets/|g' \
+    -e 's|src="/assets/|src="/docs/assets/|g' \
+    -e 's|href="index\.html"|href="/docs/index.html"|g' \
+    -e 's|href="architecture/|href="/docs/architecture/|g' \
+    -e 's|href="examples/|href="/docs/examples/|g' \
+    -e 's|href="\.\./stylesheets/|href="/docs/stylesheets/|g' \
+    -e 's|src="\.\./javascripts/|src="/docs/javascripts/|g' \
+    {} \;
+
+# Stage 2: Serve with nginx
+FROM nginx:alpine
+
+# Copy built site from builder
+COPY --from=builder /docs/site /usr/share/nginx/html
+
+# Copy nginx configuration
+COPY mkdocs-nginx.conf /etc/nginx/conf.d/default.conf
+
+# Health check (use 127.0.0.1 to force IPv4)
+# nginx receives requests without /docs/ prefix (Traefik strips it)
+HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
+    CMD wget --spider -q http://127.0.0.1:80/ || exit 1
+
+EXPOSE 80

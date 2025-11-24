@@ -1,0 +1,119 @@
+services:
+  reverse-proxy:
+    image: traefik:v2.11
+    container_name: empc4_reverse_proxy
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--log.level=INFO"
+    ports:
+      - "${HTTP_PORT:-80}:80"
+      - "${TRAEFIK_DASHBOARD_PORT:-8080}:8080"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+      - empc4_net
+    restart: unless-stopped
+
+  dashboard:
+    image: nginx:stable-alpine
+    container_name: empc4_dashboard
+    volumes:
+      - ./dashboard/dist:/usr/share/nginx/html:ro
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dashboard.rule=Host(`${ARCH_BASE_DOMAIN}`) && PathPrefix(`/`)"
+      - "traefik.http.routers.dashboard.entrypoints=web"
+      - "traefik.http.routers.dashboard.priority=1"
+    networks:
+      - empc4_net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:80/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  plantuml:
+    image: plantuml/plantuml-server:jetty
+    container_name: empc4_plantuml
+    environment:
+      - PLANTUML_LIMIT_SIZE=8192
+    volumes:
+      - "${ARCH_REPO_PATH:-./repo}:/repo:ro"
+    labels:
+      - "traefik.enable=true"
+      # Router für /plantuml Pfad
+      - "traefik.http.routers.plantuml.rule=Host(`${ARCH_BASE_DOMAIN}`) && PathPrefix(`/plantuml`)"
+      - "traefik.http.routers.plantuml.entrypoints=web"
+      - "traefik.http.routers.plantuml.priority=10"
+      - "traefik.http.middlewares.plantuml-stripprefix.stripprefix.prefixes=/plantuml"
+      - "traefik.http.routers.plantuml.middlewares=plantuml-stripprefix"
+      # Zusätzlicher Router für /uml Pfad (PlantUML generiert intern Links mit /uml/)
+      - "traefik.http.routers.plantuml-uml.rule=Host(`${ARCH_BASE_DOMAIN}`) && PathPrefix(`/uml`)"
+      - "traefik.http.routers.plantuml-uml.entrypoints=web"
+      - "traefik.http.routers.plantuml-uml.priority=10"
+      - "traefik.http.middlewares.plantuml-uml-stripprefix.stripprefix.prefixes=/uml"
+      - "traefik.http.routers.plantuml-uml.middlewares=plantuml-uml-stripprefix"
+      # Service-Definition (für beide Router)
+      - "traefik.http.services.plantuml.loadbalancer.server.port=8080"
+    networks:
+      - empc4_net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  docs:
+    build:
+      context: .
+      dockerfile: Dockerfile.mkdocs
+    image: empc4-mkdocs-material:latest
+    container_name: empc4_docs
+    working_dir: /docs
+    volumes:
+      - "${ARCH_REPO_PATH:-./repo}:/docs"
+    # Command wird vom Dockerfile übernommen (mkdocs serve -a 0.0.0.0:8000)
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.docs.rule=Host(`${ARCH_BASE_DOMAIN}`) && PathPrefix(`/docs`)"
+      - "traefik.http.routers.docs.entrypoints=web"
+      - "traefik.http.routers.docs.priority=10"
+      # StripPrefix für Docs
+      - "traefik.http.middlewares.docs-stripprefix.stripprefix.prefixes=/docs"
+      - "traefik.http.routers.docs.middlewares=docs-stripprefix"
+      - "traefik.http.services.docs.loadbalancer.server.port=8000"
+    networks:
+      - empc4_net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "python -c 'import urllib.request; urllib.request.urlopen(\"http://localhost:8000\")' || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Excalidraw ist optional und muss selbst gehostet oder über excalidraw.com verwendet werden
+  # Siehe runbook.md für Self-Hosting-Optionen
+  # excalidraw:
+  #   image: excalidraw/excalidraw:latest
+  #   container_name: empc4_excalidraw
+  #   labels:
+  #     - "traefik.enable=true"
+  #     - "traefik.http.routers.excalidraw.rule=Host(`${ARCH_BASE_DOMAIN}`) && PathPrefix(`/whiteboard`)"
+  #     - "traefik.http.routers.excalidraw.entrypoints=web"
+  #     - "traefik.http.routers.excalidraw.priority=10"
+  #     - "traefik.http.services.excalidraw.loadbalancer.server.port=80"
+  #   networks:
+  #     - empc4_net
+  #   restart: unless-stopped
+
+networks:
+  empc4_net:
+    driver: bridge

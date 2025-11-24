@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kroki - Universal Diagram Service</title>
+    <link rel="stylesheet" href="/global-nav.css">
+    <style>
+        :root {
+            --primary-color: #4a9eff;
+            --secondary-color: #6db3ff;
+            --bg-dark: #1a1a2e;
+            --card-bg: #2d2d44;
+            --text-light: #e0e0e0;
+            --text-muted: #a0a0b0;
+            --border-color: #3d3d55;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a2332 0%, #000000 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--text-light);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            border: 1px solid var(--border-color);
+        }
+
+        h1 {
+            color: var(--text-light);
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 1.1em;
+        }
+
+        .section {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        h2 {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            font-size: 1.8em;
+        }
+
+        .formats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .format-tag {
+            background: #1a2332;
+            padding: 10px 15px;
+            border-radius: 6px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+
+        .api-example {
+            background: #0f0f1e;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+            border-left: 4px solid var(--primary-color);
+            overflow-x: auto;
+        }
+
+        code {
+            color: var(--secondary-color);
+            font-family: 'Courier New', monospace;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .example-diagram {
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .example-diagram img {
+            max-width: 100%;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background: white;
+            padding: 20px;
+        }
+
+        pre {
+            background: #0f0f1e;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .info-box {
+            background: #1a2332;
+            border-left: 4px solid var(--primary-color);
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+        }
+
+        a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        a:hover {
+            color: var(--secondary-color);
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎯 Kroki - Universal Diagram Service</h1>
+            <p class="subtitle">Erstelle Diagramme aus Text - 20+ Formate über eine einheitliche API</p>
+        </header>
+
+        <div class="section">
+            <h2>Was ist Kroki?</h2>
+            <p>
+                Kroki ist ein universeller Diagramm-Service, der über 20 verschiedene Text-basierte
+                Diagramm-Formate unterstützt. Sende einfach deine Diagramm-Definition per HTTP-Request
+                und erhalte PNG, SVG oder PDF zurück.
+            </p>
+
+            <div class="info-box">
+                <strong>🚀 Vorteile:</strong>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li>Einheitliche API für alle Diagramm-Typen</li>
+                    <li>Keine Installation erforderlich</li>
+                    <li>Integration in IDEs, CI/CD, Dokumentation</li>
+                    <li>Unterstützt PlantUML, Mermaid, C4, BPMN und viele mehr</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📊 Unterstützte Formate</h2>
+            <div class="formats">
+                <div class="format-tag">PlantUML</div>
+                <div class="format-tag">Mermaid</div>
+                <div class="format-tag">GraphViz</div>
+                <div class="format-tag">C4-PlantUML</div>
+                <div class="format-tag">BPMN</div>
+                <div class="format-tag">BlockDiag</div>
+                <div class="format-tag">SeqDiag</div>
+                <div class="format-tag">ActDiag</div>
+                <div class="format-tag">NwDiag</div>
+                <div class="format-tag">Ditaa</div>
+                <div class="format-tag">Erd</div>
+                <div class="format-tag">Excalidraw</div>
+                <div class="format-tag">Nomnoml</div>
+                <div class="format-tag">Svgbob</div>
+                <div class="format-tag">Vega</div>
+                <div class="format-tag">Vega-Lite</div>
+                <div class="format-tag">WaveDrom</div>
+                <div class="format-tag">Structurizr</div>
+                <div class="format-tag">Pikchr</div>
+                <div class="format-tag">... und mehr</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🔧 API-Verwendung</h2>
+
+            <h3 style="color: var(--text-light); margin-top: 20px;">HTTP GET (einfach)</h3>
+            <div class="api-example">
+                <code>GET /kroki/{diagram_type}/{output_format}/{encoded_diagram}</code>
+            </div>
+
+            <h3 style="color: var(--text-light); margin-top: 20px;">Beispiel: PlantUML zu SVG</h3>
+            <pre><code>@startuml
+Alice -> Bob: Hello
+Bob -> Alice: Hi!
+@enduml</code></pre>
+
+            <p style="margin: 10px 0;">Base64 + deflate encodieren, dann:</p>
+            <div class="api-example">
+                <code>GET http://arch.local/kroki/plantuml/svg/eNpLzkksLlZwVKhWqOZSUABzFJRSi0r0cxOBPAVbB0WgpJOClY61goMDAwAA_iAFQ==</code>
+            </div>
+
+            <h3 style="color: var(--text-light); margin-top: 20px;">HTTP POST (für längere Diagramme)</h3>
+            <pre><code>curl -X POST http://arch.local/kroki/plantuml/svg \
+  -H "Content-Type: text/plain" \
+  -d '@startuml
+Alice -> Bob: Hello
+Bob -> Alice: Hi!
+@enduml'</code></pre>
+
+            <h3 style="color: var(--text-light); margin-top: 20px;">Mermaid-Beispiel</h3>
+            <pre><code>graph TD
+    A[Start] --> B{Entscheidung}
+    B -->|Ja| C[Aktion 1]
+    B -->|Nein| D[Aktion 2]</code></pre>
+
+            <div class="api-example">
+                <code>POST http://arch.local/kroki/mermaid/svg</code><br>
+                <code>Content-Type: text/plain</code>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📚 Integration</h2>
+
+            <div class="grid">
+                <div>
+                    <h3 style="color: var(--text-light);">MkDocs Plugin</h3>
+                    <pre><code>pip install mkdocs-kroki-plugin
+
+# mkdocs.yml
+plugins:
+  - kroki:
+      ServerURL: http://arch.local/kroki</code></pre>
+                </div>
+
+                <div>
+                    <h3 style="color: var(--text-light);">VS Code Extension</h3>
+                    <p style="margin: 10px 0;">Installiere "Kroki" Extension:</p>
+                    <pre><code>code --install-extension pomdtr.kroki</code></pre>
+                </div>
+
+                <div>
+                    <h3 style="color: var(--text-light);">Markdown (Inline)</h3>
+                    <pre><code>&lt;img src="http://arch.local/kroki/
+plantuml/svg/BASE64..." /></code></pre>
+                </div>
+
+                <div>
+                    <h3 style="color: var(--text-light);">Python</h3>
+                    <pre><code>import requests
+import base64
+import zlib
+
+diagram = """@startuml
+A -> B
+@enduml"""
+
+encoded = base64.urlsafe_b64encode(
+    zlib.compress(diagram.encode(), 9)
+).decode()
+
+url = f"http://arch.local/kroki/
+plantuml/svg/{encoded}"
+img = requests.get(url).content</code></pre>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🔗 Ressourcen</h2>
+            <div style="margin: 20px 0;">
+                <a href="https://kroki.io" target="_blank" class="btn">📖 Offizielle Dokumentation</a>
+                <a href="https://kroki.io/examples.html" target="_blank" class="btn">🎨 Beispiele ansehen</a>
+                <a href="/" class="btn">🏠 Zurück zum Dashboard</a>
+            </div>
+
+            <div class="info-box" style="margin-top: 20px;">
+                <strong>💡 Tipp:</strong> Für interaktives Editieren nutze den
+                <a href="/plantuml">PlantUML Server</a> oder
+                <a href="/whiteboard">Excalidraw</a> aus dem Dashboard.
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>⚡ Quick Test</h2>
+            <p>Teste die API direkt in deinem Browser:</p>
+            <div style="margin: 20px 0;">
+                <a href="/kroki/plantuml/svg/eNpLzkksLlZwVKhWqOZSUABzFJRSi0r0cxOBPAVbB0WgpJOClY61goMDAwAA_iAFQ=="
+                   target="_blank" class="btn">🧪 PlantUML Beispiel (SVG)</a>
+                <a href="/kroki/mermaid/svg/eNpljzEPgjAURfd-xZudiUtnRhM3E_-AgT7aJpQS-mriv7ekbgy6vdx7cnLuMIHlMXSBL3PQZ2TjF1y0L2hBSS6LJ0K0TMDy7aAMDJqWt-C2JiXOayf70W-LdjC2iq17evXbGb1y0SaXn4bCfTlLPkU="
+                   target="_blank" class="btn">🧪 Mermaid Beispiel (SVG)</a>
+            </div>
+        </div>
+    </div>
+    <script src="/global-nav.js"></script>
+</body>
+</html>
