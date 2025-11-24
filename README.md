@@ -15,13 +15,6 @@
 ## 🎓 Über dieses Projekt
 
 **Lernprojekt** 
-Das Projekt dient als praktische Übung mit Nutzwert.
-
-- 🐳 **Containerisierung** mit Docker & Docker Compose
-- 🏗️ **Infrastruktur als Code** (IaC)
-- 📚 **Architektur-Dokumentation** mit "Architecture as Code"
-- 🔄 **DevOps-Praktiken** und CI/CD-Grundlagen
-- 🔐 **Security Best Practices** für Container-Umgebungen
 
 ---
 
@@ -256,7 +249,7 @@ docker-compose ps
 
 ### Version 1.1 (2024-11-24)
 
-✨ **Mermaid Live Enhancements**
+✨ **Initial Release**
 
 - ✅ **Save Diagram Feature** - Lokales Speichern von Mermaid-Diagrammen als .mmd Datei
 - ✅ **Load Diagram Feature** - Laden von .mmd Dateien zurück in den Editor
@@ -271,27 +264,6 @@ docker-compose ps
 - pako-Kompression für State-Management
 - Keine Cloud-Abhängigkeit - alles läuft lokal
 - Browser-kompatibel: Chrome, Firefox, Safari, Edge
-
-
-### Version 1.0 (2024-11-20)
-
-✨ **Initial Release**
-
-- ✅ Docker Compose Setup
-- ✅ Traefik Reverse Proxy mit Service Discovery
-- ✅ PlantUML Server mit C4-Support
-- ✅ MkDocs Material mit Mermaid-Plugin
-- ✅ Excalidraw Integration
-- ✅ Dashboard mit Service-Übersicht
-- ✅ Health Checks für alle Services
-- ✅ Setup-Automatisierung (setup.sh)
-- ✅ Umfassende Dokumentation (Runbook)
-- ✅ C4-Beispieldiagramme
-
-**Bekannte Einschränkungen:**
-- Nur HTTP (kein HTTPS/TLS)
-- Keine Authentifizierung
-- MkDocs-Start dauert 30-40s
 
 ---
 
