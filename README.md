@@ -62,16 +62,12 @@ Die Mermaid Live Editor Integration wurde mit benutzerdefinierten Features erwei
 
 ## 🚀 Schnellstart
 
-### ⚠️ Wichtig: Korrekte URL verwenden
+`http://arch.local/`  
 
-**RICHTIG:** `http://arch.local/`  
-**FALSCH:** ❌ `http://localhost:8080/`
-
-**Warum?**
 - Port **80** (`arch.local`): Alle Hauptservices über Traefik Reverse Proxy
 - Port **8080** (`localhost:8080`): Nur Traefik Monitoring-Dashboard
 
-⚠️ **Bei Verwendung von `localhost:8080` werden alle Links im Burger-Menü falsch aufgelöst!**
+
 
 ### Voraussetzungen
 
@@ -133,8 +129,8 @@ docker-compose ps
 
 ### ⚠️ Zugriff auf Services
 
-**WICHTIG:** Verwende immer `http://arch.local/` als Basis-URL!  
-❌ **NICHT** `http://localhost:8080/` verwenden (das ist nur das Traefik Monitoring-Dashboard)!
+`http://arch.local/` als Basis-URL!  
+`http://localhost:8080/` Traefik Monitoring-Dashboard!
 
 | Service | URL | Beschreibung |
 |---------|-----|--------------|
@@ -145,7 +141,7 @@ docker-compose ps
 | ✏️ **Whiteboard** | http://arch.local/whiteboard | Excalidraw |
 | 🔧 **Traefik** | http://localhost:8080 | Monitoring Dashboard |
 
-### Wichtige Dokumente
+### Dokumente
 
 - 📋 **[Runbook](runbook.md)** - Vollständige Betriebsanleitung
 - 🏗️ **[Architektur](docs/docu/empc4-vis-arch.md)** - Architektur-Übersicht
