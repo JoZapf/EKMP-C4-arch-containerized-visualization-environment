@@ -135,7 +135,7 @@ docker-compose ps
 | Service | URL | Beschreibung |
 |---------|-----|--------------|
 | 🏠 **Dashboard** | http://arch.local/ | Haupteinstieg |
-| 📚 **Dokumentation** | http://arch.local/docs | Architektur-Dokumentation |
+| 📚 **Dokumentation** | http://arch.local/docs/index.html | Architektur-Dokumentation |
 | 🎨 **PlantUML** | http://arch.local/plantuml | Diagramm-Renderer |
 | 🌊 **Mermaid Live** | http://arch.local/mermaid | Interaktiver Editor (mit Save/Load) |
 | ✏️ **Whiteboard** | http://arch.local/whiteboard | Excalidraw |
