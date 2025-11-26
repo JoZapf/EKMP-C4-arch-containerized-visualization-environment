@@ -43,9 +43,17 @@ docker compose stop
 # Alle Container stoppen und entfernen
 docker compose down
 
+# Container stoppen, entfernen + verwaiste Container entfernen
+docker compose down --remove-orphans
+
 # Container stoppen und Volumes entfernen
 docker compose down -v
+
+# Container stoppen, Volumes + verwaiste Container entfernen
+docker compose down -v --remove-orphans
 ```
+
+**Hinweis:** `--remove-orphans` entfernt Container, die nicht mehr in der docker-compose.yml definiert sind. Nützlich nach Service-Umbenennungen oder -Entfernungen.
 
 ### Container-Status prüfen
 

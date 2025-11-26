@@ -1,14 +1,16 @@
-# Willkommen bei EMPC4 VIS Stack
+# Willkommen bei EKMP-C4 Architektur-Visualisierungs Stack
 
 Dies ist die zentrale Dokumentationsseite für die **EMPC4 Containerisierte Visualisierungsumgebung**.
 
-## Was ist EMPC4 VIS Stack?
+## Was ist EKMP-C4 VIS Stack?
 
 EMPC4 VIS Stack ist eine containerisierte Umgebung, die verschiedene Visualisierungs- und Diagramm-Tools vereint:
 
+- **Excalidraw** für interaktive Whiteboards und Skizzen
+- **Kroki** universeller API Diagramm-Service
 - **PlantUML** (inkl. C4-PlantUML) für Architecture as Code
 - **Mermaid** für Diagramme direkt in Markdown
-- **Excalidraw** für interaktive Whiteboards und Skizzen
+
 
 ## Quick Start
 
@@ -17,9 +19,11 @@ EMPC4 VIS Stack ist eine containerisierte Umgebung, die verschiedene Visualisier
 | Tool | URL | Beschreibung |
 |------|-----|--------------|
 | Dashboard | [http://arch.local/](http://arch.local/) | Haupteinstiegspunkt |
-| Dokumentation | [http://arch.local/docs](http://arch.local/docs) | Diese Seite |
+| Kroki | [http://arch.local/kroki](http://arch.local/kroki) | API Diagram-Service |
 | PlantUML | [http://arch.local/plantuml](http://arch.local/plantuml) | Diagramm-Renderer |
 | Whiteboard | [http://arch.local/whiteboard](http://arch.local/whiteboard) | Excalidraw |
+| Dokumentation | [http://arch.local/docs](http://arch.local/docs) | Diese Seite |
+| Traefik Dashboard | [http://localhost:8080/](http://localhost:8080/) | Entrypoints & Services |
 
 ### Services Status
 

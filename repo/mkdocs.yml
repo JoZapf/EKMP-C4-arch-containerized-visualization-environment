@@ -1,4 +1,4 @@
-site_name: EMPC4 Architektur-Dokumentation
+site_name: EKMP-C4 Architektur-Dokumentation
 site_description: Containerisierte Visualisierungsumgebung für PlantUML, Mermaid und Excalidraw
 # WICHTIG: site_url muss leer/root sein, damit MkDocs /assets/ generiert (nicht /docs/assets/)
 # Das post-build sed script im Dockerfile schreibt dann /assets/ zu /docs/assets/ um
@@ -76,9 +76,6 @@ nav:
     - Mermaid: examples/mermaid.md
     - PlantUML: examples/plantuml.md
   - Setup:
-    - Navigation:
-      - Übersicht: setup/navigation.md
-      - Implementierung: setup/navigation-implementierung.md
     - Docker Befehle: setup/docker-befehle.md
     - MkDocs Anleitung: setup/mkdocs-usage.md
     - Features:
@@ -86,6 +83,7 @@ nav:
       - Golable Navigation: 
         - Übersicht: setup/navigation.md
         - Implementierung: setup/navigation-implementierung.md
+        - MkDocs Navigation Fix: setup/mkdocs-navigation-fix.md
 
 extra:
   social:

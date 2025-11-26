@@ -1,4 +1,4 @@
-# EMPC4 VIS Stack
+# EKMP-C4 ARCHITEKTUR VISUALISIERUNGS STACK
 
 **Containerisierte Visualisierungsumgebung für Kroki API Service, PlantUML , Mermaid und Excalidraw**
 
@@ -20,7 +20,7 @@
 
 ## 🎯 Überblick
 
-EKMP-C4-arch - Excallidraw, Kroki, Mermaid, PlantUML Visualization Architecture - ist eine vollständig lokale containerisierte Lösung für Architektur-Visualisierung und -Dokumentation. Die Umgebung vereint die Tools für "Architecture as Code" in einem einfach zu bedienenden Stack mit custom Features.
+EKMP-C4-arch- Excallidraw, Kroki, Mermaid, PlantUML -C4 Architektur Visualisierung - ist eine vollständig lokale containerisierte Lösung für Architektur-Visualisierung und -Dokumentation. Die Umgebung vereint die Tools für "Architecture as Code" in einem einfach zu bedienenden Stack mit custom Features.
 
 ### Features
 - 🏠 **Dashboard** - Zentraler Einstiegspunkt für alle Tools
@@ -61,6 +61,17 @@ Die Mermaid Live Editor Integration wurde mit benutzerdefinierten Features erwei
 ---
 
 ## 🚀 Schnellstart
+
+### ⚠️ Wichtig: Korrekte URL verwenden
+
+**RICHTIG:** `http://arch.local/`  
+**FALSCH:** ❌ `http://localhost:8080/`
+
+**Warum?**
+- Port **80** (`arch.local`): Alle Hauptservices über Traefik Reverse Proxy
+- Port **8080** (`localhost:8080`): Nur Traefik Monitoring-Dashboard
+
+⚠️ **Bei Verwendung von `localhost:8080` werden alle Links im Burger-Menü falsch aufgelöst!**
 
 ### Voraussetzungen
 
@@ -120,7 +131,10 @@ docker-compose ps
 
 ## 📖 Dokumentation
 
-### Zugriff auf Services
+### ⚠️ Zugriff auf Services
+
+**WICHTIG:** Verwende immer `http://arch.local/` als Basis-URL!  
+❌ **NICHT** `http://localhost:8080/` verwenden (das ist nur das Traefik Monitoring-Dashboard)!
 
 | Service | URL | Beschreibung |
 |---------|-----|--------------|

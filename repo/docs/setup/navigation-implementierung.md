@@ -135,7 +135,7 @@ RUN mkdocs build --strict
 **Datei:** `repo/mkdocs.yml`
 
 ```yaml
-site_name: EMPC4 Architektur-Dokumentation
+site_name: EKMP-C4 Architektur-Dokumentation
 
 # ... andere Config ...
 

@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <span class="nav-icon">🏠</span>
             <span>Dashboard</span>
         </a>
-        <a href="/docs">
+        <a href="/docs/index.html">
             <span class="nav-icon">📚</span>
             <span>Dokumentation</span>
         </a>

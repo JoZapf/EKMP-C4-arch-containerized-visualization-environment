@@ -46,7 +46,7 @@
         
         const navItems = [
             { href: '/', icon: '🏠', text: 'Dashboard', id: 'dashboard' },
-            { href: '/docs', icon: '📚', text: 'Dokumentation', id: 'docs' },
+            { href: '/docs/index.html', icon: '📚', text: 'Dokumentation', id: 'docs' },
             { href: '/kroki', icon: '🎯', text: 'Kroki Service', id: 'kroki' },
             { href: '/plantuml', icon: '🎨', text: 'PlantUML Server', id: 'plantuml' },
             { href: '/mermaid', icon: '📊', text: 'Mermaid Editor', id: 'mermaid' },
