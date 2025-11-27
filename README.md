@@ -46,7 +46,7 @@ Die Mermaid Live Editor Integration wurde mit benutzerdefinierten Features erwei
 - pako-Kompression für State-Management
 - Automatische Button-Injection via Dockerfile
 
-📖 **Dokumentation:** [`docs/features/mermaid_save_load_features.md`](docs/features/mermaid_save_load_features.md)
+📖 **Dokumentation:** [`docs/features/mermaid_save_load_features.md`](repo/features/mermaid_save_load_features.md)
 
 ```
 ┌─────────────────────────────────────────────┐
@@ -143,11 +143,11 @@ docker-compose ps
 
 ### Dokumente
 
-- 📋 **[Runbook](runbook.md)** - Vollständige Betriebsanleitung
-- 🏗️ **[Architektur](docs/docu/empc4-vis-arch.md)** - Architektur-Übersicht
-- 🐳 **[Docker Compose](docs/docu/empc4-vis-arch_compose.md)** - Technische Details
+- 📋 **[Runbook](repo/docs/runbook.md)** - Vollständige Betriebsanleitung
+- 🏗️ **[Architektur](repo/docs//empc4-vis-arch.md)** - Architektur-Übersicht
+- 🐳 **[Docker Compose](repo/docs//empc4-vis-arch_compose.md)** - Technische Details
 - 🎨 **[C4-Diagramme](repo/c4/README.md)** - C4-PlantUML Beispiele
-- 🌊 **[Mermaid Features](docs/20251124_mermaid_save_load_features.md)** - Save/Load Dokumentation
+- 🌊 **[Mermaid Features](repo/docs/features/mermaid_save_load_features.md)** - Save/Load Dokumentation
 
 ---
 
