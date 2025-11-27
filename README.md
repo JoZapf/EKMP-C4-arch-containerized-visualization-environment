@@ -113,8 +113,10 @@ start http://arch.local/
 # 1. Umgebung konfigurieren
 Copy-Item .env.example .env
 
-# 2. Domain in hosts-Datei eintragen
-Add-Content -Path C:\Windows\System32\drivers\etc\hosts -Value "`n127.0.0.1    arch.local"
+# 2. Domain in hosts-Datei eintragen (falls nicht vorhanden)
+if (-not (Get-Content C:\Windows\System32\drivers\etc\hosts | Select-String "arch.local")) {
+    Add-Content -Path C:\Windows\System32\drivers\etc\hosts -Value "`n127.0.0.1`tarch.local"
+}
 
 # 3. Services starten
 docker-compose up -d
