@@ -113,7 +113,49 @@ else
     fi
 fi
 
-# 5. Prüfe ob Container bereits laufen
+# 5. Port-Check (falls verfügbar)
+info "Prüfe Port-Verfügbarkeit..."
+
+# Prüfe ob Python verfügbar ist
+if command -v python3 &> /dev/null || command -v python &> /dev/null; then
+    PYTHON_CMD="python3"
+    if ! command -v python3 &> /dev/null; then
+        PYTHON_CMD="python"
+    fi
+    
+    # Prüfe ob psutil verfügbar ist
+    if $PYTHON_CMD -c "import psutil" 2>/dev/null; then
+        info "Führe Port-Check aus..."
+        
+        if $PYTHON_CMD scripts/empc4_port_check.py --suggest-fixes; then
+            success "Alle Ports verfügbar"
+        else
+            error "Port-Konflikte gefunden!"
+            echo ""
+            warning "Löse die Port-Konflikte bevor du die Container startest."
+            echo "Tipps:"
+            echo "  1. Ändere Ports in .env (z.B. HTTP_PORT=8080)"
+            echo "  2. Stoppe belegende Services/Container"
+            echo ""
+            read -p "Trotzdem fortfahren? (y/N): " -n 1 -r
+            echo
+            if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+                error "Setup abgebrochen"
+                exit 1
+            fi
+            warning "Fahre fort trotz Port-Konflikten..."
+        fi
+    else
+        warning "psutil nicht installiert - Port-Check übersprungen"
+        info "Installiere mit: pip install psutil"
+    fi
+else
+    warning "Python nicht gefunden - Port-Check übersprungen"
+fi
+
+echo ""
+
+# 6. Prüfe ob Container bereits laufen
 info "Prüfe laufende Container..."
 
 if docker-compose ps 2>/dev/null | grep -q "Up" || docker compose ps 2>/dev/null | grep -q "running"; then
@@ -127,7 +169,7 @@ if docker-compose ps 2>/dev/null | grep -q "Up" || docker compose ps 2>/dev/null
     fi
 fi
 
-# 6. Pull Images
+# 7. Pull Images
 info "Lade Docker Images..."
 if command -v docker-compose &> /dev/null; then
     docker-compose pull
@@ -136,7 +178,7 @@ else
 fi
 success "Images geladen"
 
-# 7. Starte Services
+# 8. Starte Services
 info "Starte Services..."
 echo ""
 if command -v docker-compose &> /dev/null; then
@@ -148,11 +190,11 @@ fi
 echo ""
 success "Services gestartet!"
 
-# 8. Warte auf Services
+# 9. Warte auf Services
 info "Warte auf Service-Initialisierung..."
 sleep 10
 
-# 9. Prüfe Service-Status
+# 10. Prüfe Service-Status
 info "Prüfe Service-Status..."
 echo ""
 
@@ -164,7 +206,7 @@ fi
 
 echo ""
 
-# 10. Teste Erreichbarkeit
+# 11. Teste Erreichbarkeit
 info "Teste Service-Erreichbarkeit..."
 
 SERVICES=(
@@ -185,7 +227,7 @@ for service in "${SERVICES[@]}"; do
     fi
 done
 
-# 11. Zusammenfassung
+# 12. Zusammenfassung
 echo ""
 echo "======================================================================"
 echo "  Setup abgeschlossen!"

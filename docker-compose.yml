@@ -64,7 +64,7 @@ services:
     image: plantuml/plantuml-server:jetty
     container_name: empc4_plantuml_backend
     environment:
-      - PLANTUML_LIMIT_SIZE=8192
+      - PLANTUML_LIMIT_SIZE=${PLANTUML_LIMIT_SIZE:-8192}
       - BASE_URL=uml
     volumes:
       - "${ARCH_REPO_PATH:-./repo}:/repo:ro"

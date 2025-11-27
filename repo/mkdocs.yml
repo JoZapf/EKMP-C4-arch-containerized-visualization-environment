@@ -69,21 +69,22 @@ nav:
   - Home: index.md
   - Architektur:
     - Übersicht: architecture/overview.md
-    - C4-Diagramme: architecture/c4-diagrams.md
-  - Kroki:
-    - Übersicht & Anwendungsbeispiele: kroki.md
-  - Beispiele:
+    - C4-Diagramme: architecture/c4-diagrams.md   
+  - Anwendungsbeispiele:
+    - Kroki: kroki.md
     - Mermaid: examples/mermaid.md
     - PlantUML: examples/plantuml.md
   - Setup:
+    - Dependencies: setup/dependencies.md
     - Docker Befehle: setup/docker-befehle.md
     - MkDocs Anleitung: setup/mkdocs-usage.md
-    - Features:
-      - Speichern & Öffnen von Mermaid .mmd Dateien: features/mermaid_save_load_features.md
-      - Golable Navigation: 
-        - Übersicht: setup/navigation.md
-        - Implementierung: setup/navigation-implementierung.md
-        - MkDocs Navigation Fix: setup/mkdocs-navigation-fix.md
+  - Features:
+    - Speichern & Öffnen von Mermaid .mmd Dateien: features/mermaid_save_load_features.md
+    - Golable Navigation: 
+      - Übersicht: setup/navigation.md
+      - Implementierung: setup/navigation-implementierung.md
+  - Changelog:
+      - MkDocs Navigation Fix: setup/mkdocs-navigation-fix.md
 
 extra:
   social:

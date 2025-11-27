@@ -133,7 +133,55 @@ if ($hostsContent -match "arch.local") {
     }
 }
 
-# 5. Prüfe ob Container bereits laufen
+# 5. Port-Check (falls verfügbar)
+Write-Info "Prüfe Port-Verfügbarkeit..."
+
+# Prüfe ob Python verfügbar ist
+$pythonCmd = $null
+if (Get-Command python -ErrorAction SilentlyContinue) {
+    $pythonCmd = "python"
+} elseif (Get-Command python3 -ErrorAction SilentlyContinue) {
+    $pythonCmd = "python3"
+}
+
+if ($pythonCmd) {
+    # Prüfe ob psutil verfügbar ist
+    $psutilCheck = & $pythonCmd -c "import psutil" 2>$null
+    
+    if ($LASTEXITCODE -eq 0) {
+        Write-Info "Führe Port-Check aus..."
+        
+        # Führe Port-Check Script aus
+        & $pythonCmd scripts/empc4_port_check.py --suggest-fixes
+        
+        if ($LASTEXITCODE -eq 0) {
+            Write-Success "Alle Ports verfügbar"
+        } else {
+            Write-Error-Custom "Port-Konflikte gefunden!"
+            Write-Host ""
+            Write-Warning "Löse die Port-Konflikte bevor du die Container startest."
+            Write-Host "Tipps:"
+            Write-Host "  1. Ändere Ports in .env (z.B. HTTP_PORT=8080)"
+            Write-Host "  2. Stoppe belegende Services/Container"
+            Write-Host ""
+            $response = Read-Host "Trotzdem fortfahren? (y/N)"
+            if ($response -ne "y" -and $response -ne "Y") {
+                Write-Error-Custom "Setup abgebrochen"
+                exit 1
+            }
+            Write-Warning "Fahre fort trotz Port-Konflikten..."
+        }
+    } else {
+        Write-Warning "psutil nicht installiert - Port-Check übersprungen"
+        Write-Info "Installiere mit: pip install psutil"
+    }
+} else {
+    Write-Warning "Python nicht gefunden - Port-Check übersprungen"
+}
+
+Write-Host ""
+
+# 6. Prüfe ob Container bereits laufen
 Write-Info "Prüfe laufende Container..."
 
 $runningContainers = docker-compose ps -q 2>$null
@@ -147,7 +195,7 @@ if ($runningContainers) {
     }
 }
 
-# 6. Pull Images
+# 7. Pull Images
 Write-Info "Lade Docker Images..."
 try {
     docker-compose pull
@@ -156,7 +204,7 @@ try {
 }
 Write-Success "Images geladen"
 
-# 7. Starte Services
+# 8. Starte Services
 Write-Info "Starte Services..."
 Write-Host ""
 try {
@@ -168,11 +216,11 @@ try {
 Write-Host ""
 Write-Success "Services gestartet!"
 
-# 8. Warte auf Services
+# 9. Warte auf Services
 Write-Info "Warte auf Service-Initialisierung..."
 Start-Sleep -Seconds 10
 
-# 9. Prüfe Service-Status
+# 10. Prüfe Service-Status
 Write-Info "Prüfe Service-Status..."
 Write-Host ""
 
@@ -184,7 +232,7 @@ try {
 
 Write-Host ""
 
-# 10. Teste Erreichbarkeit
+# 11. Teste Erreichbarkeit
 Write-Info "Teste Service-Erreichbarkeit..."
 
 $services = @(
@@ -208,7 +256,7 @@ foreach ($service in $services) {
     }
 }
 
-# 11. Zusammenfassung
+# 12. Zusammenfassung
 Write-Host ""
 Write-Host "======================================================================"
 Write-Host "  Setup abgeschlossen!"
