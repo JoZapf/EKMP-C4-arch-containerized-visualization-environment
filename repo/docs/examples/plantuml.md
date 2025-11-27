@@ -339,12 +339,32 @@ services:
 ## Tipps für PlantUML
 
 !!! tip "Encoding für URLs"
-    PlantUML URLs verwenden ein spezielles Encoding. Nutze den Online-Editor oder Libraries:
+    PlantUML URLs verwenden ein spezielles Encoding. Es gibt **3 Optionen**:
+    
+    **Option 1: Docker-Service (empfohlen für Batch-Processing)**
+    ```bash
+    docker compose run --rm plantuml-tools encode repo/c4/beispiel-context.puml
+    ```
+    
+    **Option 2: Lokales Python-Script (schnell für einzelne Dateien)**
+    ```bash
+    # Installation:
+    pip install -r scripts/requirements-plantuml.txt
+    
+    # Nutzung:
+    python scripts/plantuml_encode.py repo/c4/beispiel-context.puml
+    ```
+    
+    **Option 3: Programmatische Nutzung**
     ```python
+    # Installation: pip install plantuml
     from plantuml import deflate_and_encode
+    
     encoded = deflate_and_encode("@startuml\nAlice -> Bob\n@enduml")
     url = f"http://arch.local/plantuml/png/{encoded}"
     ```
+    
+    📚 **Siehe auch:** [PlantUML Python Integration](../../docs/20251127_plantuml_python_integration.md)
 
 !!! warning "Performance"
     Sehr komplexe Diagramme können Rendering-Zeit benötigen. Nutze:

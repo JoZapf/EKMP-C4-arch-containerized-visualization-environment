@@ -1,6 +1,6 @@
 # MkDocs Navigation Path Issue - Fix Dokumentation
 
-**Projekt:** EMPC4 Containerized Visualization Environment  
+**Projekt:** EKMP-C4 Architektur-Visualisierungs Stack  
 **Datum:** 26.11.2025  
 **Version:** 1.3 - FINAL  
 **Status:** ✅ IMPLEMENTIERT

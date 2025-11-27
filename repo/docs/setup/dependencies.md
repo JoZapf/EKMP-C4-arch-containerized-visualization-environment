@@ -1,6 +1,6 @@
-# Dependencies - EMPC4 VIS Stack
+# Dependencies
 
-**Projekt:** EMPC4 Containerized Visualization Environment  
+**Projekt:** EKMP-C4 Architektur-Visualisierungs Stack  
 **Datum:** 27.11.2025  
 **Version:** 1.0  
 **Status:** 📦 VOLLSTÄNDIG
@@ -262,14 +262,15 @@ Dieses Dokument listet alle Software-Abhängigkeiten und Komponenten des EMPC4 V
 | 3 | [Dashboard](#3-dashboard) | Frontend | nginx:stable-alpine | ❌ |
 | 4 | [PlantUML Backend](#4-plantuml-backend) | Diagramme | plantuml/plantuml-server:jetty | ❌ |
 | 5 | [PlantUML Proxy](#5-plantuml-proxy) | Diagramme | nginx:stable-alpine | ✅ |
-| 6 | [MkDocs Dokumentation](#6-mkdocs-dokumentation) | Dokumentation | squidfunk/mkdocs-material:latest | ✅ |
-| 7 | [Excalidraw](#7-excalidraw) | Whiteboard | nginx:stable-alpine | ✅ |
-| 8 | [Mermaid Live Editor](#8-mermaid-live-editor) | Diagramme | nginx:stable-alpine | ✅ |
-| 9 | [Kroki Frontend](#9-kroki-frontend) | Diagramme | nginx:stable-alpine | ❌ |
-| 10 | [Kroki Backend](#10-kroki-backend) | Diagramme | yuzutech/kroki:latest | ❌ |
-| 11 | [Kroki BlockDiag](#11-kroki-blockdiag) | Diagramme | yuzutech/kroki-blockdiag:latest | ❌ |
-| 12 | [Kroki Mermaid](#12-kroki-mermaid) | Diagramme | yuzutech/kroki-mermaid:latest | ❌ |
-| 13 | [Kroki BPMN](#13-kroki-bpmn) | Diagramme | yuzutech/kroki-bpmn:latest | ❌ |
+| 6 | [PlantUML Tools](#6-plantuml-tools) | Utilities | python:3.11-slim | ✅ |
+| 7 | [MkDocs Dokumentation](#7-mkdocs-dokumentation) | Dokumentation | squidfunk/mkdocs-material:latest | ✅ |
+| 8 | [Excalidraw](#8-excalidraw) | Whiteboard | nginx:stable-alpine | ✅ |
+| 9 | [Mermaid Live Editor](#9-mermaid-live-editor) | Diagramme | nginx:stable-alpine | ✅ |
+| 10 | [Kroki Frontend](#10-kroki-frontend) | Diagramme | nginx:stable-alpine | ❌ |
+| 11 | [Kroki Backend](#11-kroki-backend) | Diagramme | yuzutech/kroki:latest | ❌ |
+| 12 | [Kroki BlockDiag](#12-kroki-blockdiag) | Diagramme | yuzutech/kroki-blockdiag:latest | ❌ |
+| 13 | [Kroki Mermaid](#13-kroki-mermaid) | Diagramme | yuzutech/kroki-mermaid:latest | ❌ |
+| 14 | [Kroki BPMN](#14-kroki-bpmn) | Diagramme | yuzutech/kroki-bpmn:latest | ❌ |
 
 ---
 
@@ -460,7 +461,119 @@ COPY plantuml-proxy/nginx.conf /etc/nginx/conf.d/default.conf
 
 ---
 
-## 6. MkDocs Dokumentation
+## 6. PlantUML Tools
+
+**Container:** `empc4_plantuml_tools`  
+**Image:** `empc4-plantuml-tools:latest` (Custom Build)  
+**Typ:** Utilities / CLI Tool  
+**Profile:** `tools` (startet nicht automatisch)
+
+### Software-Komponenten
+
+#### Basis-Software
+- **Python:** 3.11-slim
+  - Lightweight Python Runtime
+  - pip Package Manager
+
+#### Python-Dependencies
+- **plantuml:** >=0.3.0
+  - PlantUML API Client
+  - Encoding/Decoding
+  - Rendering API
+- **requests:** >=2.31.0
+  - HTTP Client
+  - REST API Communication
+- **click:** >=8.1.0
+  - CLI Framework
+  - Command Parsing
+  - Colored Output
+- **six:** >=1.16.0
+  - Python 2/3 Compatibility (required by plantuml)
+
+### Build-Prozess
+
+```dockerfile
+FROM python:3.11-slim
+
+WORKDIR /workspace
+
+# Install dependencies
+RUN pip install --no-cache-dir \
+    plantuml \
+    requests \
+    click \
+    six
+
+# Copy CLI tool
+COPY plantuml-tools.py /usr/local/bin/plantuml-tools
+RUN chmod +x /usr/local/bin/plantuml-tools
+
+# Volume for input/output
+VOLUME ["/data"]
+
+# Entrypoint
+ENTRYPOINT ["python", "/usr/local/bin/plantuml-tools"]
+CMD ["--help"]
+```
+
+### System-Abhängigkeiten
+- **Volume Mount:** `${ARCH_REPO_PATH:-./repo}:/data:rw`
+- **Network:** `empc4_net`
+- **Dependency:** `plantuml-backend` (Container)
+
+### Konfiguration via Environment
+```bash
+PLANTUML_URL=http://empc4_plantuml_backend:8080
+```
+
+### CLI-Befehle
+
+#### encode
+```bash
+docker compose run --rm plantuml-tools encode <file.puml>
+```
+**Zweck:** Encodiert PlantUML-Datei für URL-Nutzung
+
+#### render
+```bash
+docker compose run --rm plantuml-tools render <file.puml> [-f png|svg|txt]
+```
+**Zweck:** Rendert einzelnes Diagramm als Bild
+
+#### batch
+```bash
+docker compose run --rm plantuml-tools batch <directory> [-f png|svg] [-o output/]
+```
+**Zweck:** Batch-Processing aller .puml Dateien
+
+#### test
+```bash
+docker compose run --rm plantuml-tools test
+```
+**Zweck:** Testet Verbindung zum PlantUML-Server
+
+### Funktionen
+- ✅ URL-Encoding für PlantUML-Diagramme
+- ✅ PNG/SVG Export
+- ✅ Batch-Rendering (multiple files)
+- ✅ CI/CD Integration
+- ✅ Health-Check für PlantUML-Server
+
+### Use Cases
+- **Development:** Schnelle URL-Generierung für Diagramme
+- **CI/CD:** Automatische Diagramm-Generierung bei Git-Push
+- **Documentation:** Batch-Export für Dokumentation
+- **Debugging:** Server-Connectivity Tests
+
+### Profile-System
+**Wichtig:** Service verwendet `profiles: [tools]`
+- Startet **NICHT** mit `docker compose up`
+- Nur bei Bedarf: `docker compose run --rm plantuml-tools <command>`
+- Vermeidet unnötigen Ressourcen-Verbrauch
+
+---
+
+## 7. MkDocs Dokumentation
 
 **Container:** `empc4_docs`  
 **Image:** `empc4-mkdocs-material:latest` (Custom Build)  
@@ -529,7 +642,7 @@ find /docs/site -type f -name "*.html" -exec sed -i \
 
 ---
 
-## 7. Excalidraw
+## 8. Excalidraw
 
 **Container:** `empc4_excalidraw`  
 **Image:** `empc4-excalidraw:latest` (Custom Build)  
@@ -604,7 +717,7 @@ REACT_APP_DISABLE_TRACKING=true
 
 ---
 
-## 8. Mermaid Live Editor
+## 9. Mermaid Live Editor
 
 **Container:** `empc4_mermaid_live`  
 **Image:** `empc4-mermaid-live:latest` (Custom Build)  
@@ -701,7 +814,7 @@ kit: {
 
 ---
 
-## 9. Kroki Frontend
+## 10. Kroki Frontend
 
 **Container:** `empc4_kroki`  
 **Image:** `nginx:stable-alpine`  
@@ -744,7 +857,7 @@ location /api/ {
 
 ---
 
-## 10. Kroki Backend
+## 11. Kroki Backend
 
 **Container:** `empc4_kroki_backend`  
 **Image:** `yuzutech/kroki:latest`  
@@ -794,7 +907,7 @@ location /api/ {
 
 ---
 
-## 11. Kroki BlockDiag
+## 12. Kroki BlockDiag
 
 **Container:** `empc4_kroki_blockdiag`  
 **Image:** `yuzutech/kroki-blockdiag:latest`  
@@ -816,7 +929,7 @@ location /api/ {
 
 ---
 
-## 12. Kroki Mermaid
+## 13. Kroki Mermaid
 
 **Container:** `empc4_kroki_mermaid`  
 **Image:** `yuzutech/kroki-mermaid:latest`  
@@ -840,7 +953,7 @@ location /api/ {
 
 ---
 
-## 13. Kroki BPMN
+## 14. Kroki BPMN
 
 **Container:** `empc4_kroki_bpmn`  
 **Image:** `yuzutech/kroki-bpmn:latest`  
@@ -869,6 +982,7 @@ location /api/ {
 - **nginx:** 8 Container
 - **Traefik:** 1 Container
 - **Java (Jetty):** 1 Container (PlantUML)
+- **Python:** 1 Container (PlantUML Tools)
 - **Kroki:** 4 Container
 
 #### Frontend
@@ -878,8 +992,8 @@ location /api/ {
 
 #### Build-Tools
 - **Node.js:** Excalidraw, Mermaid Live
-- **Python:** MkDocs
-- **Docker Multi-Stage:** 4 Services
+- **Python:** MkDocs, PlantUML Tools
+- **Docker Multi-Stage:** 5 Services
 
 ### Externe Abhängigkeiten (Cloned)
 - **Excalidraw:** https://github.com/excalidraw/excalidraw (v0.17.6)
@@ -888,8 +1002,9 @@ location /api/ {
 ### Custom Code
 - **Global Navigation:** 2 Dateien (CSS + JS)
 - **Mermaid Features:** 3 Dateien (Save, Load, Debug)
+- **PlantUML Tools:** 1 CLI-Tool (Python)
 - **nginx Configs:** 5 Konfigurationen
-- **Dockerfiles:** 5 Custom Builds
+- **Dockerfiles:** 6 Custom Builds
 
 ---
 
@@ -900,6 +1015,7 @@ location /api/ {
 | Traefik | MIT | https://github.com/traefik/traefik |
 | nginx | 2-clause BSD | https://nginx.org/ |
 | PlantUML | GPL-3.0 | https://plantuml.com/ |
+| Python | PSF License | https://www.python.org/ |
 | MkDocs Material | MIT | https://squidfunk.github.io/mkdocs-material/ |
 | Excalidraw | MIT | https://github.com/excalidraw/excalidraw |
 | Mermaid | MIT | https://github.com/mermaid-js/mermaid |

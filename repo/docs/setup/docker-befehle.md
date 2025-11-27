@@ -1,6 +1,6 @@
-# Docker Befehle - EMPC4 Visualisierung
+# Docker Befehle
 
-**Projekt:** EMPC4 Containerized Visualization Environment  
+**Projekt:** EKMP-C4 Architektur-Visualisierungs Stack  
 **Erstellt:** 23.11.2025  
 **Version:** 1.0
 

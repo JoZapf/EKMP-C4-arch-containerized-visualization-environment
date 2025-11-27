@@ -74,15 +74,19 @@ nav:
     - Kroki: kroki.md
     - Mermaid: examples/mermaid.md
     - PlantUML: examples/plantuml.md
+    - C4-Diagramme: examples/c4.md
   - Setup:
     - Dependencies: setup/dependencies.md
     - Docker Befehle: setup/docker-befehle.md
     - MkDocs Anleitung: setup/mkdocs-usage.md
   - Features:
     - Speichern & Öffnen von Mermaid .mmd Dateien: features/mermaid_save_load_features.md
-    - Golable Navigation: 
+    - Global Navigation: 
       - Übersicht: setup/navigation.md
       - Implementierung: setup/navigation-implementierung.md
+    - PlantUML Tools:
+      - Benutzeranleitung: features/plantuml-tools-usage.md
+      - Technische Implementierung: features/plantuml-tools-implementation.md
   - Changelog:
       - MkDocs Navigation Fix: setup/mkdocs-navigation-fix.md
 

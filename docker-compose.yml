@@ -271,6 +271,25 @@ services:
       - empc4_net
     restart: on-failure:3
 
+  # PlantUML Tools - Python utilities for batch processing
+  plantuml-tools:
+    build:
+      context: ./plantuml-tools
+      dockerfile: Dockerfile
+    image: empc4-plantuml-tools:latest
+    container_name: empc4_plantuml_tools
+    environment:
+      - PLANTUML_URL=http://empc4_plantuml_backend:8080
+    volumes:
+      - "${ARCH_REPO_PATH:-./repo}:/data:rw"
+    networks:
+      - empc4_net
+    depends_on:
+      - plantuml-backend
+    # No restart - this is a utility service (run manually)
+    profiles:
+      - tools
+
 networks:
   empc4_net:
     driver: bridge

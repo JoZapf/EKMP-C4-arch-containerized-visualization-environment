@@ -1,0 +1,11 @@
+# PlantUML Python Library
+plantuml>=0.3.0
+
+# HTTP Requests
+requests>=2.31.0
+
+# CLI Interface (für plantuml-tools)
+click>=8.1.0
+
+# Python 2/3 compatibility (required by plantuml)
+six>=1.16.0

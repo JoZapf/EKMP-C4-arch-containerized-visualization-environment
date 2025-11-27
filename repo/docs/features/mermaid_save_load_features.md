@@ -1,6 +1,6 @@
 # Mermaid Live Editor - Save & Load Features
 
-**Projekt:** EMPC4 Containerized Visualization Environment  
+**Projekt:** EKMP-C4 Architektur-Visualisierungs Stack  
 **Erstellt:** 24.11.2025  
 **Version:** 1.0  
 **Autor:** Jo Zapf

@@ -4,6 +4,87 @@ Dieses Verzeichnis enthält Utility-Scripts für Build, Deployment und Wartung d
 
 ---
 
+## 🎨 plantuml_encode.py
+
+**Zweck:** PlantUML-Dateien für URL-Nutzung encodieren (lokale Alternative zu Docker-Tools)
+
+**Features:**
+- Encodiert PlantUML-Code für URL-Parameter
+- Generiert fertige PNG/SVG/TXT URLs
+- Schnelle lokale Nutzung ohne Docker
+
+**Abhängigkeiten:**
+```bash
+pip install -r scripts/requirements-plantuml.txt
+```
+
+**Usage:**
+```bash
+# Datei encoden
+python scripts/plantuml_encode.py repo/c4/beispiel-context.puml
+```
+
+**Output:**
+```
+File: beispiel-context.puml
+Encoded: SyfFKj2rKt3CoKnELR1Io4ZDoSa70000
+
+URLs:
+  PNG: http://arch.local/plantuml/png/SyfFKj2rKt3CoKnELR1Io4ZDoSa70000
+  SVG: http://arch.local/plantuml/svg/SyfFKj2rKt3CoKnELR1Io4ZDoSa70000
+  TXT: http://arch.local/plantuml/txt/SyfFKj2rKt3CoKnELR1Io4ZDoSa70000
+```
+
+**Alternative:** Für Batch-Processing und erweiterte Features nutze `plantuml-tools` Service (siehe unten).
+
+---
+
+## ⚙️ Docker-basierte Tools
+
+### plantuml-tools Service
+
+**Verzeichnis:** `/plantuml-tools/`
+
+**Zweck:** Umfangreiche PlantUML-Utilities für Batch-Processing und CI/CD
+
+**Features:**
+- 📦 Batch-Rendering aller `.puml` Dateien
+- 🖼️ PNG/SVG Export
+- 🔗 URL-Encoding
+- 🚀 CI/CD Integration
+- 🐳 Docker-basiert (keine lokale Installation)
+
+**Quick Start:**
+```bash
+# Service bauen
+docker compose build plantuml-tools
+
+# Einzelne Datei encoden
+docker compose run --rm plantuml-tools encode repo/c4/beispiel-context.puml
+
+# Einzelne Datei rendern
+docker compose run --rm plantuml-tools render repo/c4/beispiel-context.puml
+
+# Alle Dateien im Verzeichnis rendern
+docker compose run --rm plantuml-tools batch repo/c4
+
+# Server-Test
+docker compose run --rm plantuml-tools test
+```
+
+**Befehle:**
+
+| Befehl | Beschreibung | Beispiel |
+|--------|--------------|----------|
+| `encode` | Encodiert .puml für URL | `encode repo/c4/context.puml` |
+| `render` | Rendert einzelne Datei | `render repo/c4/context.puml -f svg` |
+| `batch` | Rendert alle .puml Dateien | `batch repo/c4 -o output/` |
+| `test` | Testet PlantUML Server | `test` |
+
+**Dokumentation:** [`/plantuml-tools/README.md`](../plantuml-tools/README.md)
+
+---
+
 ## 📜 Verfügbare Scripts
 
 ### empc4_port_check.py

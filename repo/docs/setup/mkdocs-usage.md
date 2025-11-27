@@ -1,6 +1,6 @@
 # MkDocs - Dokumentation hinzufügen
 
-**Projekt:** EMPC4 Containerized Visualization Environment  
+**Projekt:** EKMP-C4 Architektur-Visualisierungs Stack  
 **Erstellt:** 23.11.2025  
 **Autor:** Jo Zapf
 
