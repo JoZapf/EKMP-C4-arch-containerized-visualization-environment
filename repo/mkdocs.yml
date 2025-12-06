@@ -106,7 +106,7 @@ extra:
     name_short: "EKMP-C4 Architektur-Stack"
     name_abbr: "EKMP-C4"
     author: "Jo Zapf"
-    version: "1.4.1"
+    version: "1.4.2"
     status: "✅ PRODUKTIV"
     github_repo: "https://github.com/JoZapf/EKMP-C4-arch-containerized-visualization-environment"
   

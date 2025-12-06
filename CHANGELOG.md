@@ -15,6 +15,35 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [1.4.2] - 2025-12-06
+
+### Fixed
+- **Kroki global-nav.css/js 404-Fehler**
+  - Problem: Browser fragte `/global-nav.css` statt `/kroki/global-nav.css`
+  - Ursache: Traefik stripped `/kroki` Prefix, aber HTML hatte absolute Pfade ohne Prefix
+  - Lösung: Pfade in `kroki-frontend/index.html` auf `/kroki/global-nav.*` geändert
+
+- **Health-Check Traefik Ports falsch**
+  - Problem: Health-Check fragte Port 8080 statt 9090
+  - Lösung: URLs in `health-check.js` auf Port 9090 aktualisiert
+
+- **Health-Check zeigt "online" bei 404**
+  - Problem: `img.onerror` gab `status: 'online'` zurück (Design-Fehler)
+  - Lösung: Neuer Status `error` mit gelber `warning`-Anzeige
+
+### Technical
+- **Geänderte Dateien:**
+  - `kroki-frontend/index.html` - Pfade für global-nav
+  - `dashboard/dist/health-check.js` - Ports + Error-Handling
+  - `dashboard/dist/index.html` - CSS für `.warning` Status
+
+- **Kein Rebuild erforderlich** - Dateien sind per Volume gemounted
+
+### Documentation
+- `docs/20251206_kroki_healthcheck_fixes.md`
+
+---
+
 ## [1.4.1] - 2025-12-06
 
 ### Fixed

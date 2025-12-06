@@ -14,14 +14,14 @@ class ServiceHealthChecker {
                 name: 'traefik',
                 displayName: 'Traefik Proxy',
                 element: 'traefik-status',
-                checkUrl: 'http://localhost:8080/api/overview',
+                checkUrl: 'http://localhost:9090/api/overview',
                 method: 'image' // Traefik API
             },
             {
                 name: 'traefik-dashboard',
                 displayName: 'Traefik Dashboard',
                 element: 'traefik-dashboard-status',
-                checkUrl: 'http://localhost:8080/',
+                checkUrl: 'http://localhost:9090/dashboard/',
                 method: 'image' // Favicon check
             },
             {
@@ -115,9 +115,9 @@ class ServiceHealthChecker {
                     resolved = true;
                     clearTimeout(timeoutId);
                     const latency = Date.now() - timestamp;
-                    // Selbst bei 404 ist der Service erreichbar!
-                    // Nur komplette Network-Errors sind wirklich offline
-                    resolve({ status: 'online', latency });
+                    // 404 bedeutet: Server antwortet, aber Ressource fehlt
+                    // Das ist NICHT dasselbe wie "online" - zeige als Warnung
+                    resolve({ status: 'error', latency });
                 }
             };
 
@@ -226,12 +226,15 @@ class ServiceHealthChecker {
         }
 
         // Entferne alle Status-Klassen
-        indicator.classList.remove('online', 'offline', 'checking', 'timeout');
+        indicator.classList.remove('online', 'offline', 'checking', 'timeout', 'warning');
 
         // Setze neue Status-Klasse
         if (result.status === 'online') {
             indicator.classList.add('online');
             indicator.title = `Online (${result.latency}ms)`;
+        } else if (result.status === 'error') {
+            indicator.classList.add('warning');
+            indicator.title = `Erreichbar aber Fehler (${result.latency}ms)`;
         } else if (result.status === 'timeout') {
             indicator.classList.add('offline');
             indicator.title = 'Timeout - möglicherweise offline';

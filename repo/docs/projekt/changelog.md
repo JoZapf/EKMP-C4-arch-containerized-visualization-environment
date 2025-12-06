@@ -6,7 +6,18 @@ Das vollständige Changelog findest du im Repository-Root:
 
 ---
 
-## Aktuelle Version: 1.4.1 (06.12.2025)
+## Aktuelle Version: 1.4.2 (06.12.2025)
+
+### Highlights
+
+**Gefixt:**
+- Kroki: global-nav.css/js 404-Fehler behoben (Pfad-Prefix fehlte)
+- Health-Check: Traefik Ports auf 9090 korrigiert
+- Health-Check: 404-Fehler werden jetzt als Warnung (gelb) angezeigt
+
+---
+
+## Version 1.4.1 (06.12.2025)
 
 ### Highlights
 
