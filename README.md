@@ -204,40 +204,114 @@ docker-compose ps
 
 ```
 .
-├── docker-compose.yml       # Service-Definitionen
-├── .env.example             # Umgebungsvariablen (Vorlage)
-├── setup.sh                 # Automatisches Setup-Script
-├── runbook.md               # Umfassende Betriebsanleitung
-│
-├── dashboard/               # Dashboard-Frontend
-│   └── dist/
-│       └── index.html       # Hauptseite
-│
-├── mermaid-live/            # Mermaid Live Editor Container
-│   ├── Dockerfile           # Custom Build mit Save/Load Features
-│   └── nginx.conf
-│
-├── mermaid-save-override.js # Save Diagram Feature
-├── mermaid-load-button.js   # Load Diagram Feature
-│
-├── repo/                    # Git-Repository für Inhalte
-│   ├── mkdocs.yml           # MkDocs-Konfiguration
-│   ├── docs/                # Markdown-Dokumentation
-│   │   ├── index.md
-│   │   ├── architecture/
-│   │   └── examples/
-│   ├── c4/                  # C4-PlantUML-Diagramme
-│   │   ├── beispiel-context.puml
-│   │   ├── beispiel-container.puml
-│   │   └── README.md
-│   └── assets/              # Bilder, Exports
-│       └── excalidraw/
-│
-└── docs/                    # Technische Dokumentation
-    ├── docu/
-    │   ├── empc4-vis-arch.md
-    │   └── empc4-vis-arch_compose.md
-    └── 20251124_mermaid_save_load_features.md  # Feature-Dokumentation
+├── CHANGELOG.md
+├── DIAGNOSE_MKDOCS.sh
+├── Dockerfile.mkdocs
+├── README.md
+├── _project-tree-structure.txt
+├── dashboard
+│   └── dist
+│       ├── health-check.js
+│       └── index.html
+├── data
+│   └── letsencrypt
+├── docker-compose.yml
+├── docker-compose.yml.baseline
+├── excalidraw
+│   ├── Dockerfile
+│   └── nginx.conf
+├── fix-docs-routing.ps1
+├── global-nav.css
+├── global-nav.js
+├── kroki-frontend
+│   ├── global-nav.css
+│   ├── global-nav.js
+│   ├── index.html
+│   └── nginx.conf
+├── mermaid-ad-hide.css
+├── mermaid-debug.js
+├── mermaid-live
+│   ├── Dockerfile
+│   └── nginx.conf
+├── mermaid-load-button.js
+├── mermaid-save-override.js
+├── mkdocs-nginx.conf
+├── plantuml-proxy
+│   ├── Dockerfile
+│   └── nginx.conf
+├── plantuml-tools
+│   ├── Dockerfile
+│   ├── README.md
+│   └── plantuml-tools.py
+├── repo
+│   ├── assets
+│   │   └── excalidraw
+│   ├── c4
+│   │   ├── README.md
+│   │   ├── beispiel-component.puml
+│   │   ├── beispiel-container.puml
+│   │   └── beispiel-context.puml
+│   ├── docs
+│   │   ├── README.md
+│   │   ├── _templates
+│   │   │   ├── README.md
+│   │   │   ├── doc-header.md
+│   │   │   └── feature-header.md
+│   │   ├── architecture
+│   │   │   ├── c4-diagrams.md
+│   │   │   └── overview.md
+│   │   ├── empc4-vis-arch.md
+│   │   ├── empc4-vis-arch_compose.md
+│   │   ├── examples
+│   │   │   ├── c4.md
+│   │   │   ├── mermaid.md
+│   │   │   └── plantuml.md
+│   │   ├── features
+│   │   │   ├── mermaid_save_load_features.md
+│   │   │   ├── navigation-implementierung.md
+│   │   │   ├── plantuml-tools-implementation.md
+│   │   │   └── plantuml-tools-usage.md
+│   │   ├── index.md
+│   │   ├── javascripts
+│   │   │   └── global-nav.js
+│   │   ├── kroki.md
+│   │   ├── mkdocs-macros-demo.md
+│   │   ├── mkdocs-metadata-system.md
+│   │   ├── projekt
+│   │   │   └── changelog.md
+│   │   ├── runbook.md
+│   │   ├── setup
+│   │   │   ├── analysing_env_usage.md
+│   │   │   ├── dashboard-health-check.md
+│   │   │   ├── dashboard-quick-wins-phase1.md
+│   │   │   ├── dependencies.md
+│   │   │   ├── docker-befehle.md
+│   │   │   ├── macro-header-test.md
+│   │   │   ├── macro-test-minimal.md
+│   │   │   ├── metadata-example.md
+│   │   │   ├── metadata-final.md
+│   │   │   ├── metadata-test-simple.md
+│   │   │   ├── mkdocs-navigation-fix.md
+│   │   │   ├── mkdocs-usage.md
+│   │   │   ├── navigation-implementierung.md
+│   │   │   ├── navigation.md
+│   │   │   └── template-test-no-include.md
+│   │   └── stylesheets
+│   │       ├── global-nav.css
+│   │       └── navigation-indent.css
+│   ├── macros.py
+│   └── mkdocs.yml
+├── scripts
+│   ├── README.md
+│   ├── empc4_port_check.py
+│   ├── plantuml_encode.py
+│   └── requirements-plantuml.txt
+├── setup.ps1
+├── setup.sh
+└── traefik-proxy
+    ├── Dockerfile
+    ├── global-nav.js
+    └── nginx.conf
 ```
 
 ---
