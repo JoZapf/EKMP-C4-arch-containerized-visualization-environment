@@ -1,5 +1,5 @@
 /**
- * Global Navigation Menu for EMPC4 VIS Stack
+ * Global Navigation Menu for EKMP-C4 ARCHITEKTUR VISUALISIERUNGS STACK
  * Wiederverwendbar für alle Services
  * 
  * Verwendung:
@@ -51,7 +51,7 @@
             { href: '/plantuml', icon: '🎨', text: 'PlantUML Server', id: 'plantuml' },
             { href: '/mermaid', icon: '📊', text: 'Mermaid Editor', id: 'mermaid' },
             { href: '/whiteboard', icon: '✏️', text: 'Excalidraw Server', id: 'whiteboard' },
-            { href: 'http://localhost:8080', icon: '⚙️', text: 'Traefik Dashboard', id: 'traefik', target: '_blank' },
+            { href: 'http://localhost:9090', icon: '⚙️', text: 'Traefik Dashboard', id: 'traefik', target: '_blank' },
             { href: 'https://github.com/JoZapf/EMPC4-containerized-visualization-environment', icon: '💻', text: 'GitHub Repository', id: 'github', target: '_blank' }
         ];
         

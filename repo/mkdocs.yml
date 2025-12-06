@@ -38,6 +38,8 @@ theme:
 plugins:
   - search:
       lang: de
+  - macros:
+      module_name: macros
   - mermaid2:
       arguments:
         theme: |
@@ -79,21 +81,54 @@ nav:
     - Dependencies: setup/dependencies.md
     - Docker Befehle: setup/docker-befehle.md
     - MkDocs Anleitung: setup/mkdocs-usage.md
+    - MkDocs Metadata System: 
+      - Finale Lösung: setup/metadata-final.md
+      - Live-Beispiel: setup/metadata-example.md
   - Features:
-    - Speichern & Öffnen von Mermaid .mmd Dateien: features/mermaid_save_load_features.md
     - Global Navigation: 
       - Übersicht: setup/navigation.md
+      - Navigation Fix (404): setup/mkdocs-navigation-fix.md
       - Implementierung: setup/navigation-implementierung.md
+    - Dashboard:
+      - Health-Check System: setup/dashboard-health-check.md
+      - Quick Wins (Phase 1): setup/dashboard-quick-wins-phase1.md
+    - Mermaid:
+      - Speichern & Öffnen (.mmd): features/mermaid_save_load_features.md
     - PlantUML Tools:
       - Benutzeranleitung: features/plantuml-tools-usage.md
       - Technische Implementierung: features/plantuml-tools-implementation.md
-  - Changelog:
-      - MkDocs Navigation Fix: setup/mkdocs-navigation-fix.md
+  - Projekt:
+    - Changelog: projekt/changelog.md
 
 extra:
+  project:
+    name: "EKMP-C4 Architektur-Visualisierungs Stack"
+    name_short: "EKMP-C4 Architektur-Stack"
+    name_abbr: "EKMP-C4"
+    author: "Jo Zapf"
+    version: "1.4"
+    status: "✅ PRODUKTIV"
+    github_repo: "https://github.com/JoZapf/EKMP-C4-arch-containerized-visualization-environment"
+  
+  templates:
+    header: |
+      **Projekt:** {{ project.name }}  
+      **Autor:** {{ project.author }}  
+      **Version:** {{ project.version }}  
+      **Status:** {{ project.status }}
+    
+    feature_header: |
+      **Projekt:** {{ project.name_short }}  
+      **Feature:** {{ page.meta.feature }}  
+      **Implementiert:** {{ page.meta.implemented | default('2025') }}  
+      **Version:** {{ page.meta.version | default('1.0') }}  
+      **Status:** {{ page.meta.status | default('📋 PLANUNG') }}
+      
+      ---
+  
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/JoZapf/EMPC4-containerized-visualization-environment
+      link: https://github.com/JoZapf/EKMP-C4-arch-containerized-visualization-environment
 
 extra_css:
   - stylesheets/global-nav.css

@@ -80,26 +80,28 @@ RUN mkdir -p /app/final-build && \
 # Stage 2: Serve with nginx
 FROM nginx:stable-alpine
 
-# Copy global navigation files
+# Copy global navigation files and ad-hide CSS
 COPY global-nav.css /tmp/global-nav.css
 COPY global-nav.js /tmp/global-nav.js
 COPY mermaid-save-override.js /tmp/mermaid-save-override.js
 COPY mermaid-load-button.js /tmp/mermaid-load-button.js
 COPY mermaid-debug.js /tmp/mermaid-debug.js
+COPY mermaid-ad-hide.css /tmp/mermaid-ad-hide.css
 
 # Copy built files from builder stage into /mermaid subdirectory
 COPY --from=builder /app/final-build /usr/share/nginx/html/mermaid
 
-# Copy global navigation files into mermaid directory
+# Copy global navigation files and ad-hide CSS into mermaid directory
 RUN cp /tmp/global-nav.css /usr/share/nginx/html/mermaid/ && \
     cp /tmp/global-nav.js /usr/share/nginx/html/mermaid/ && \
     cp /tmp/mermaid-save-override.js /usr/share/nginx/html/mermaid/ && \
     cp /tmp/mermaid-load-button.js /usr/share/nginx/html/mermaid/ && \
     cp /tmp/mermaid-debug.js /usr/share/nginx/html/mermaid/ && \
-    rm /tmp/global-nav.* /tmp/mermaid-*.js
+    cp /tmp/mermaid-ad-hide.css /usr/share/nginx/html/mermaid/ && \
+    rm /tmp/global-nav.* /tmp/mermaid-*.js /tmp/mermaid-ad-hide.css
 
-# Inject global navigation into index.html
-RUN sed -i 's|</head>|    <link rel="stylesheet" href="/mermaid/global-nav.css">\n    </head>|' \
+# Inject global navigation and ad-hide CSS into index.html
+RUN sed -i 's|</head>|    <link rel="stylesheet" href="/mermaid/global-nav.css">\n    <link rel="stylesheet" href="/mermaid/mermaid-ad-hide.css">\n    </head>|' \
     /usr/share/nginx/html/mermaid/index.html && \
     sed -i 's|</body>|    <script src="/mermaid/global-nav.js"></script>\n    <script src="/mermaid/mermaid-debug.js"></script>\n    <script src="/mermaid/mermaid-save-override.js"></script>\n    <script src="/mermaid/mermaid-load-button.js"></script>\n</body>|' \
     /usr/share/nginx/html/mermaid/index.html

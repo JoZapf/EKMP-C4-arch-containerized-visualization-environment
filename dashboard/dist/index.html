@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EMPC4 VIS Stack - Dashboard</title>
+    <title>EKMP-C4 ARCHITEKTUR VISUALISIERUNGS STACK - Dashboard</title>
+    <!-- Global Navigation CSS -->
+    <link rel="stylesheet" href="/global-nav.css">
     <style>
         :root {
             --primary-color: #4a9eff;
@@ -13,7 +15,7 @@
             --danger-color: #f44336;
             --bg-dark: #1a1a2e;
             --bg-darker: #0f0f1e;
-            --card-bg: #2d2d44;
+            --card-bg: #0f0f1e;
             --card-bg-hover: #35354f;
             --text-light: #e0e0e0;
             --text-muted: #a0a0b0;
@@ -30,7 +32,7 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #1a2332 0%, #000000 100%);
+            background: linear-gradient(180deg, #1a2332 0%, #000000 50%);
             min-height: 100vh;
             padding: 20px;
             color: var(--text-light);
@@ -47,112 +49,11 @@
             border-radius: 12px;
             margin-bottom: 25px;
             box-shadow: var(--card-shadow);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
             border: 1px solid var(--border-color);
         }
 
         .header-content {
             flex: 1;
-        }
-
-        .nav-dropdown {
-            position: relative;
-        }
-
-        .nav-button {
-            background: rgba(74, 158, 255, 0.1);
-            color: var(--primary-color);
-            padding: 8px 12px;
-            border: 2px solid var(--text-light);
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 1.2em;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.3s ease;
-        }
-
-        .nav-button:hover {
-            color: white;
-        }
-
-        .nav-button.active {
-            color: white;
-        }
-
-        .hamburger {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            width: 24px;
-        }
-
-        .hamburger span {
-            display: block;
-            height: 3px;
-            background: var(--text-light);
-            border-radius: 2px;
-            transition: all 0.3s ease;
-        }
-
-        .nav-button.active .hamburger span:nth-child(1) {
-            transform: rotate(45deg) translate(6px, 6px);
-        }
-
-        .nav-button.active .hamburger span:nth-child(2) {
-            opacity: 0;
-        }
-
-        .nav-button.active .hamburger span:nth-child(3) {
-            transform: rotate(-45deg) translate(6px, -6px);
-        }
-
-        .nav-menu {
-            display: none;
-            position: absolute;
-            right: 0;
-            top: calc(100% + 8px);
-            background: var(--card-bg);
-            border-radius: 8px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-            min-width: 250px;
-            z-index: 1000;
-            border: 1px solid var(--border-color);
-        }
-
-        .nav-menu.active {
-            display: block;
-        }
-
-        .nav-menu a {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 15px 20px;
-            color: var(--text-light);
-            text-decoration: none;
-            transition: background 0.2s ease;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .nav-menu a:last-child {
-            border-bottom: none;
-        }
-
-        .nav-menu a:hover {
-            background: var(--card-bg-hover);
-        }
-
-        .nav-menu a:first-child {
-            border-radius: 8px 8px 0 0;
-        }
-
-        .nav-menu a:last-child {
-            border-radius: 0 0 8px 8px;
         }
 
         h1 {
@@ -246,14 +147,6 @@
             color: white;
         }
 
-        .btn-secondary {
-            background: var(--text-light);
-        }
-
-        .btn-secondary:hover {
-            background: var(--text-dark);
-        }
-
         .status-section {
             background: var(--card-bg);
             border-radius: 12px;
@@ -288,8 +181,22 @@
             width: 12px;
             height: 12px;
             border-radius: 50%;
+            background: var(--text-muted);
+            transition: background 0.3s ease;
+        }
+
+        .status-indicator.online {
             background: var(--success-color);
             animation: pulse 2s infinite;
+        }
+
+        .status-indicator.offline {
+            background: var(--danger-color);
+        }
+
+        .status-indicator.checking {
+            background: var(--warning-color);
+            animation: pulse 1s infinite;
         }
 
         @keyframes pulse {
@@ -302,14 +209,148 @@
             color: var(--text-light);
         }
 
+        /* Footer with Tabs */
         footer {
-            background: var(--card-bg);
-            padding: 20px;
+            background: var(--bg-darker);
+            padding: 30px 20px;
             border-radius: 12px;
-            text-align: center;
             color: var(--text-muted);
             box-shadow: var(--card-shadow);
             border: 1px solid var(--border-color);
+        }
+
+        /* Tab System */
+        .footer-tabs {
+            display: flex;
+            gap: 0;
+            margin-bottom: 25px;
+        }
+
+        .footer-tab {
+            padding: 12px 24px;
+            background: transparent;
+            color: var(--text-muted);
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .footer-tab:hover {
+            color: var(--text-light);
+            background: rgba(74, 158, 255, 0.05);
+        }
+
+        .footer-tab.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+        }
+
+        .footer-tab-content {
+            display: none;
+        }
+
+        .footer-tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .footer-content {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .social-badges {
+            display: flex;
+            justify-content: center;
+            align-items: stretch;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .social-card {
+            background: var(--bg-darker);
+            padding: 25px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            min-width: 280px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .social-card:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(74, 158, 255, 0.2);
+        }
+
+        .social-card h4 {
+            color: var(--text-light);
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .social-card .profile-name {
+            font-size: 1.1em;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .social-card .profile-title {
+            color: var(--text-muted);
+            font-size: 0.9em;
+            margin-bottom: 15px;
+        }
+
+        .social-links {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .social-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: rgba(74, 158, 255, 0.1);
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .social-btn:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .social-btn svg {
+            width: 18px;
+            height: 18px;
+            fill: currentColor;
+        }
+
+        .footer-links {
+            text-align: center;
         }
 
         footer a {
@@ -352,24 +393,27 @@
                 grid-template-columns: 1fr;
             }
 
-            header {
+            .social-badges {
                 flex-direction: column;
                 gap: 20px;
-                align-items: flex-start;
             }
 
-            .nav-dropdown {
-                width: 100%;
+            .social-card {
+                min-width: 100%;
             }
 
-            .nav-button {
-                width: 100%;
-                justify-content: center;
+            .footer-tabs {
+                flex-direction: column;
+                gap: 5px;
             }
 
-            .nav-menu {
-                left: 0;
-                right: 0;
+            .footer-tab {
+                border-bottom: none;
+                border-left: 3px solid transparent;
+            }
+
+            .footer-tab.active {
+                border-left-color: var(--primary-color);
             }
         }
     </style>
@@ -380,59 +424,47 @@
             <div class="header-content">
                 <h1>
                     <span>🎨</span>
-                    EMPC4 - containerized visualization architecture environment
+                    EKMP-C4 ARCHITEKTUR VISUALISIERUNGS STACK 👁
                 </h1>
-                <p class="subtitle">Kroki - Mermaid - PlantUML - Excalidraw</p>
-            </div>
-            <div class="nav-dropdown">
-                <button class="nav-button" id="navToggle">
-                    <div class="hamburger">
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                    </div>
-                </button>
-                <div class="nav-menu" id="navMenu">
-                    <a href="/">🏠 Dashboard</a>
-                    <a href="/docs/index.html">📚 Dokumentation</a>
-                    <a href="/kroki">🎯 Kroki Service</a>
-                    <a href="/plantuml">🎨 PlantUML Server</a>
-                    <a href="/mermaid">📊 Mermaid Editor</a>
-                    <a href="/whiteboard">✏️ Excalidraw Server</a>
-                    <a href="http://localhost:8080" target="_blank">⚙️ Traefik Dashboard</a>
-                    <a href="https://github.com/JoZapf/EMPC4-containerized-visualization-environment" target="_blank">💻 GitHub Repository</a>
-                </div>
+                <p class="subtitle">Context, Container, Component, Code ➥ Kroki - Mermaid - PlantUML - Excalidraw</p>
             </div>
         </header>
 
         <div class="status-section">
             <h2>🚀 Services Status</h2>
+            <p style="color: var(--text-muted); font-size: 0.9em; margin-bottom: 15px;">
+                ✅ Live Health-Check alle 10 Sekunden • Orange = Prüfung läuft • Grün = Online • Rot = Offline
+            </p>
             <div class="status-grid">
-                <div class="status-item">
+                <div class="status-item" id="traefik-status">
                     <span class="status-indicator"></span>
                     <span class="status-name">Traefik Proxy</span>
                 </div>
-                <div class="status-item">
+                <div class="status-item" id="traefik-dashboard-status">
+                    <span class="status-indicator"></span>
+                    <span class="status-name">Traefik Dashboard</span>
+                </div>
+                <div class="status-item" id="dashboard-status">
                     <span class="status-indicator"></span>
                     <span class="status-name">Dashboard</span>
                 </div>
-                <div class="status-item">
+                <div class="status-item" id="kroki-status">
                     <span class="status-indicator"></span>
                     <span class="status-name">Kroki Service</span>
                 </div>
-                <div class="status-item">
+                <div class="status-item" id="plantuml-status">
                     <span class="status-indicator"></span>
                     <span class="status-name">PlantUML Server</span>
                 </div>
-                <div class="status-item">
+                <div class="status-item" id="mermaid-status">
                     <span class="status-indicator"></span>
                     <span class="status-name">Mermaid Editor</span>
                 </div>
-                <div class="status-item">
+                <div class="status-item" id="docs-status">
                     <span class="status-indicator"></span>
                     <span class="status-name">Dokumentation</span>
                 </div>
-                <div class="status-item">
+                <div class="status-item" id="excalidraw-status">
                     <span class="status-indicator"></span>
                     <span class="status-name">Excalidraw</span>
                 </div>
@@ -503,10 +535,10 @@
                     Zeigt alle Services, Routers, Middlewares und Health-Status.
                 </p>
                 <div class="info-box">
-                    <strong>Port:</strong> 8080 (nur lokal erreichbar)
+                    <strong>Port:</strong> 9090 (nur lokal erreichbar)
                 </div>
                 <div class="tile-footer">
-                    <a href="http://localhost:8080" class="btn" target="_blank">⚙️ Traefik öffnen</a>
+                    <a href="http://localhost:9090" class="btn" target="_blank">⚙️ Traefik öffnen</a>
                 </div>
             </div>
 
@@ -545,44 +577,145 @@
             </div>
         </div>
 
-        <footer>
-            <p>
-                <strong>EMPC4 VIS Stack</strong> - Entwickelt mit ❤️ für bessere Architektur-Dokumentation
-            </p>
-            <p>
-                <a href="https://github.com/JoZapf/EMPC4-containerized-visualization-environment" target="_blank">GitHub Repository</a> |
-                <a href="/docs/index.html" target="_blank">Dokumentation</a> |
-                <a href="https://github.com/JoZapf/EMPC4-containerized-visualization-environment/blob/main/runbook.md" target="_blank">Runbook</a>
-            </p>
+        <footer id="footer-section">
+            <!-- Tab Navigation -->
+            <div class="footer-tabs">
+                <button class="footer-tab active" data-tab="info">📋 Info & Links</button>
+                <button class="footer-tab" data-tab="contact" data-scroll="true">👤 Kontakt & Profile</button>
+            </div>
+
+            <!-- Tab Content: Info & Links (Default) -->
+            <div class="footer-tab-content active" id="tab-info">
+                <div class="footer-content">
+                    <div class="footer-links">
+                        <p style="margin-bottom: 15px;">
+                            <strong style="font-size: 1.2em; color: var(--text-light);">EKMP-C4 Architektur-Stack</strong><br>
+                            <span style="color: var(--text-muted);">für Context-, Container-, Component- & Code-Architektur-Dokumentation</span>
+                        </p>
+                        <p>
+                            <a href="https://github.com/JoZapf/EKMP-C4-arch-containerized-visualization-environment" target="_blank">📦 GitHub Repository</a> |
+                            <a href="/docs/index.html">📚 Dokumentation</a> |
+                            <a href="https://github.com/JoZapf/EKMP-C4-arch-containerized-visualization-environment/blob/main/runbook.md" target="_blank">📖 Runbook</a>
+                        </p>
+                        <p style="margin-top: 20px; font-size: 0.9em; color: var(--text-muted);">
+                            Version 1.0 • Self-hosted Visualization Environment
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Content: Kontakt & Profile -->
+            <div class="footer-tab-content" id="tab-contact">
+                <div class="footer-content">
+                    <div class="social-badges">
+                        <!-- Website Card -->
+                        <div class="social-card">
+                            <h4>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+                                </svg>
+                                Website
+                            </h4>
+                            <div class="profile-name">jozapf.de</div>
+                            <div class="profile-title">Portfolio & Projekte</div>
+                            <div class="social-links">
+                                <a href="https://www.jozapf.de" target="_blank" class="social-btn">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+                                    </svg>
+                                    Website besuchen
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- LinkedIn Card -->
+                        <div class="social-card">
+                            <h4>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="#0A66C2">
+                                    <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                                </svg>
+                                LinkedIn
+                            </h4>
+                            <div class="profile-name">Jo Zapf</div>
+                            <div class="profile-title">Umschüler Fachinformatiker Anwendungsentwicklung</div>
+                            <div class="social-links">
+                                <a href="https://de.linkedin.com/in/jo-zapf" target="_blank" class="social-btn">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+                                        <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                                    </svg>
+                                    Profil ansehen
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- GitHub Card -->
+                        <div class="social-card">
+                            <h4>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                                </svg>
+                                GitHub
+                            </h4>
+                            <div class="profile-name">@JoZapf</div>
+                            <div class="profile-title">EKMP-C4 & weitere Projekte</div>
+                            <div class="social-links">
+                                <a href="https://github.com/JoZapf" target="_blank" class="social-btn">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+                                        <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
+                                    </svg>
+                                    Profil ansehen
+                                </a>
+                                <a href="https://github.com/JoZapf/EKMP-C4-arch-containerized-visualization-environment" target="_blank" class="social-btn">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+                                        <path d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path>
+                                    </svg>
+                                    EKMP-C4 Repository
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </footer>
     </div>
 
+    <!-- Footer Tab Switching with Scroll -->
     <script>
-        // Hamburger menu toggle
-        const navToggle = document.getElementById('navToggle');
-        const navMenu = document.getElementById('navMenu');
-
-        navToggle.addEventListener('click', function(e) {
-            e.stopPropagation();
-            navToggle.classList.toggle('active');
-            navMenu.classList.toggle('active');
-        });
-
-        // Close menu when clicking outside
-        document.addEventListener('click', function(e) {
-            if (!navToggle.contains(e.target) && !navMenu.contains(e.target)) {
-                navToggle.classList.remove('active');
-                navMenu.classList.remove('active');
-            }
-        });
-
-        // Close menu when clicking on a link
-        navMenu.querySelectorAll('a').forEach(link => {
-            link.addEventListener('click', function() {
-                navToggle.classList.remove('active');
-                navMenu.classList.remove('active');
+        document.querySelectorAll('.footer-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                // Remove active from all tabs and contents
+                document.querySelectorAll('.footer-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.footer-tab-content').forEach(c => c.classList.remove('active'));
+                
+                // Add active to clicked tab and corresponding content
+                this.classList.add('active');
+                const tabId = this.getAttribute('data-tab');
+                document.getElementById('tab-' + tabId).classList.add('active');
+                
+                // Scroll to footer if data-scroll is set (for larger content tabs)
+                if (this.getAttribute('data-scroll') === 'true') {
+                    // Small delay to let content render
+                    setTimeout(() => {
+                        document.getElementById('footer-section').scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }, 50);
+                }
             });
         });
     </script>
+
+    <!-- Health Check JavaScript -->
+    <script src="health-check.js"></script>
+    
+    <!-- Global Navigation JavaScript -->
+    <script src="/global-nav.js"></script>
+    
+    <!-- LinkedIn Badge Script -->
+    <script src="https://platform.linkedin.com/badges/js/profile.js" async defer type="text/javascript"></script>
+    
+    <!-- GitHub Buttons Script -->
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
 </body>
 </html>

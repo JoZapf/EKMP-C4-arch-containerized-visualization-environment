@@ -1,8 +1,10 @@
 # Stage 1: Build documentation
 FROM squidfunk/mkdocs-material:latest AS builder
 
-# Installiere Mermaid-Plugin
-RUN python -m pip install --no-cache-dir mkdocs-mermaid2-plugin
+# Installiere MkDocs Plugins
+RUN python -m pip install --no-cache-dir \
+    mkdocs-mermaid2-plugin \
+    mkdocs-macros-plugin
 
 # Copy project files
 WORKDIR /docs

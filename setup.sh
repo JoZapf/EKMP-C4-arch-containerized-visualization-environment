@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# EMPC4 VIS Stack - Setup Script
+# EKMP-C4 ARCHITEKTUR VISUALISIERUNGS STACK - Setup Script
 # Dieses Script bereitet die Umgebung für den ersten Start vor
 
 set -e  # Exit bei Fehlern

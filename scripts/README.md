@@ -1,6 +1,6 @@
-# Scripts - EMPC4 VIS Stack
+# Scripts - EKMP-C4 ARCHITEKTUR VISUALISIERUNGS STACK
 
-Dieses Verzeichnis enthält Utility-Scripts für Build, Deployment und Wartung des EMPC4 VIS Stack.
+Dieses Verzeichnis enthält Utility-Scripts für Build, Deployment und Wartung des EKMP-C4 ARCHITEKTUR VISUALISIERUNGS STACK.
 
 ---
 

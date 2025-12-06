@@ -12,10 +12,8 @@
 
 ---
 
-## 🎓 Über dieses Projekt
-
-**Lernprojekt** 
-
+## 🎓 Über dieses **Lernprojekt**
+> ⚠️ **Work in progress:** services und docs befinden sich in Entwicklung.
 ---
 
 ## 🎯 Überblick

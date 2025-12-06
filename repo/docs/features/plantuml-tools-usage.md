@@ -516,4 +516,4 @@ A: Ja! Siehe [Technische Implementierung](plantuml-tools-implementation.md) für
 
 **Version:** 1.0  
 **Status:** ✅ Produktionsbereit  
-**Support:** [GitHub Issues](https://github.com/JoZapf/EMPC4-containerized-visualization-environment/issues)
+**Support:** [GitHub Issues](https://github.com/JoZapf/EKMP-C4-arch-containerized-visualization-environment/issues)

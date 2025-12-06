@@ -7,15 +7,25 @@ graph TB
     User[Benutzer] --> ReverseProxy[Traefik<br/>Reverse Proxy]
 
     ReverseProxy --> Dashboard[Dashboard<br/>nginx]
-    ReverseProxy --> PlantUML[PlantUML Server<br/>Jetty]
+    ReverseProxy --> PlantUMLProxy[PlantUML Proxy<br/>nginx]
+    ReverseProxy --> Kroki[Kroki Frontend<br/>nginx]
+    ReverseProxy --> Mermaid[Mermaid Live Editor<br/>nginx]
     ReverseProxy --> Docs[MkDocs Material<br/>Dokumentation]
     ReverseProxy --> Excalidraw[Excalidraw<br/>Whiteboard]
+    ReverseProxy --> TraefikDash[Traefik Dashboard<br/>nginx]
+
+    PlantUMLProxy --> PlantUML[PlantUML Backend<br/>Jetty]
+    Kroki --> KrokiBackend[Kroki Backend]
+    KrokiBackend --> KrokiBlockDiag[BlockDiag]
+    KrokiBackend --> KrokiMermaidComp[Mermaid Companion]
+    KrokiBackend --> KrokiBPMN[BPMN]
 
     PlantUML --> Repo[(Git Repository<br/>docs, c4, assets)]
     Docs --> Repo
 
-    style ReverseProxy fill:#f9f,stroke:#333,stroke-width:2px
-    style Repo fill:#bbf,stroke:#333,stroke-width:2px
+    style ReverseProxy fill:#1e3a5f,stroke:#4a9eff,stroke-width:3px,color:#fff
+    style Repo fill:#2d4a6b,stroke:#4a9eff,stroke-width:2px,color:#fff
+    style KrokiBackend fill:#1e3a5f,stroke:#4a9eff,stroke-width:2px,color:#fff
 ```
 
 ## Komponenten
@@ -103,15 +113,35 @@ graph LR
     subgraph Docker Network empc4_net
         Traefik
         Dashboard[Dashboard]
-        PlantUML[PlantUML :8080]
-        Docs[Docs :8000]
-        Excalidraw[Excalidraw :80]
+        TraefikDash[Traefik Dashboard :8080]
+        PlantUMLProxy[PlantUML Proxy]
+        PlantUML[PlantUML Backend :8080]
+        KrokiFE[Kroki Frontend]
+        KrokiBE[Kroki Backend :8000]
+        KrokiBlock[BlockDiag :8001]
+        KrokiMerm[Mermaid :8002]
+        KrokiBPMN[BPMN :8003]
+        MermaidLive[Mermaid Live Editor]
+        Docs[Docs]
+        Excalidraw[Excalidraw]
     end
 
     Traefik --> Dashboard
-    Traefik --> PlantUML
+    Traefik --> TraefikDash
+    Traefik --> PlantUMLProxy
+    Traefik --> KrokiFE
+    Traefik --> MermaidLive
     Traefik --> Docs
     Traefik --> Excalidraw
+    
+    PlantUMLProxy --> PlantUML
+    KrokiFE --> KrokiBE
+    KrokiBE --> KrokiBlock
+    KrokiBE --> KrokiMerm
+    KrokiBE --> KrokiBPMN
+
+    style Traefik fill:#1e3a5f,stroke:#4a9eff,stroke-width:2px,color:#fff
+    style KrokiBE fill:#1e3a5f,stroke:#4a9eff,stroke-width:2px,color:#fff
 ```
 
 ## Daten-Persistenz
@@ -141,23 +171,47 @@ Alle Services haben konfigurierte Healthchecks:
 | Service | Check-Interval | Timeout | Start Period |
 |---------|---------------|---------|--------------|
 | Dashboard | 30s | 10s | 10s |
-| PlantUML | 30s | 10s | 20s |
-| Docs | 30s | 10s | 40s |
+| PlantUML Backend | 30s | 10s | 20s |
+| PlantUML Proxy | 30s | 10s | 10s |
+| Traefik Reverse Proxy | 30s | 10s | 5s |
+| Traefik Dashboard Proxy | 30s | 10s | 10s |
+| Kroki Frontend | 30s | 10s | 10s |
+| Kroki Backend | 30s | 10s | 15s |
+| Kroki BlockDiag | 30s | 10s | 15s |
+| Kroki Mermaid | 30s | 10s | 15s |
+| Kroki BPMN | 30s | 10s | 15s |
+| Mermaid Live Editor | 30s | 10s | 15s |
+| MkDocs Dokumentation | 30s | 10s | 40s |
 | Excalidraw | 30s | 10s | 15s |
 
 ## Service-Abhängigkeiten
 
 ```mermaid
 graph TD
-    RP[Reverse Proxy] --> |benötigt| Docker[Docker Socket]
-    Dashboard --> |verlinkt zu| PlantUML
+    RP[Reverse Proxy<br/>Traefik] --> |benötigt| Docker[Docker Socket]
+    
+    Dashboard[Dashboard] --> |verlinkt zu| PlantUMLProxy
+    Dashboard --> |verlinkt zu| Kroki
+    Dashboard --> |verlinkt zu| Mermaid
     Dashboard --> |verlinkt zu| Docs
     Dashboard --> |verlinkt zu| Excalidraw
-    PlantUML --> |liest| Repo[Git Repo]
-    Docs --> |liest| Repo
+    Dashboard --> |verlinkt zu| TraefikDash
+    
+    PlantUMLProxy[PlantUML Proxy] --> |proxy zu| PlantUML[PlantUML Backend]
+    
+    KrokiFE[Kroki Frontend] --> |proxy zu| KrokiBE[Kroki Backend]
+    KrokiBE --> |nutzt| KrokiBlock[BlockDiag]
+    KrokiBE --> |nutzt| KrokiMerm[Mermaid Companion]
+    KrokiBE --> |nutzt| KrokiBPMN[BPMN]
+    
+    PlantUML --> |liest| Repo[Git Repository]
+    Docs[MkDocs] --> |liest| Repo
+    
+    TraefikDash[Traefik Dashboard Proxy] --> |proxy zu| RP
 
-    style RP fill:#f96,stroke:#333,stroke-width:2px
-    style Repo fill:#bbf,stroke:#333,stroke-width:2px
+    style RP fill:#1e3a5f,stroke:#4a9eff,stroke-width:3px,color:#fff
+    style Repo fill:#2d4a6b,stroke:#4a9eff,stroke-width:2px,color:#fff
+    style KrokiBE fill:#1e3a5f,stroke:#4a9eff,stroke-width:2px,color:#fff
 ```
 
 ## Sicherheitsaspekte

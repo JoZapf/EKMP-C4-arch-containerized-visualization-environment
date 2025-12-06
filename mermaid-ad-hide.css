@@ -1,0 +1,48 @@
+/* Mermaid Live Editor - Ad/Promotional Banner Hide Override */
+/* Hides the "Mermaid Chart" promotional banners */
+/* WICHTIG: Selektoren müssen präzise sein um Save-Button nicht zu treffen! */
+
+/* Target the pink promotional banner by EXACT background color */
+/* Der Banner hat: bg-[#E0095F] (Mermaid Chart Pink) */
+div[class*="bg-[#E0095F]"],
+.bg-\[\#E0095F\] {
+    display: none !important;
+}
+
+/* Target banner container - NUR wenn es den pinken Hintergrund enthält */
+/* NICHT: .flex.flex-grow[role="button"] - das trifft auch den Save-Button! */
+div[role="banner"]:has([class*="bg-[#E0095F]"]) {
+    display: none !important;
+}
+
+/* Alternative für Browser ohne :has() Support */
+/* Target by href to mermaidchart.com */
+a[href*="mermaidchart.com/landing"],
+a[href*="mermaidchart.com/whiteboard"] {
+    display: none !important;
+}
+
+/* Hide parent of mermaidchart links - nur der spezifische Banner-Container */
+div[role="banner"]:has(a[href*="mermaidchart.com"]) {
+    display: none !important;
+}
+
+/* Fallback: Verstecke den Banner-Text direkt */
+span:has(~ button):has(a[href*="mermaidchart.com"]) {
+    display: none !important;
+}
+
+/* Target "Try now" button nur im Banner-Kontext (mit mermaidchart Link) */
+a[href*="mermaidchart.com"] + button,
+a[href*="mermaidchart.com"] button {
+    display: none !important;
+}
+
+/* Verstecke den äußeren flex-grow Container NUR wenn er den Banner enthält */
+.flex.flex-grow:has([class*="bg-[#E0095F]"]) {
+    display: none !important;
+}
+
+.flex.flex-grow:has(a[href*="mermaidchart.com"]) {
+    display: none !important;
+}

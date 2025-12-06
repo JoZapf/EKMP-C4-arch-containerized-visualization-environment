@@ -1,4 +1,4 @@
-# EMPC4 VIS Stack - Setup Script (PowerShell)
+# EKMP-C4 ARCHITEKTUR VISUALISIERUNGS STACK - Setup Script (PowerShell)
 # Dieses Script bereitet die Umgebung für den ersten Start vor (Windows)
 
 # Setze Error Action

@@ -20,7 +20,7 @@ Features:
 Credits:
     - Basiert auf port_usage_report.py (Home Lab Infra Monitor)
     - Author: Jo Zapf
-    - Project: EKMP-C4 Architektur-Visualisierungs Stack
+    - Project: EKMP-C4 ARCHITEKTUR VISUALISIERUNGS STACK
 """
 
 from __future__ import annotations

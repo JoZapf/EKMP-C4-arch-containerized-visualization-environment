@@ -1,5 +1,5 @@
 # EKMP-C4 ARCHITEKTUR VISUALISIERUNGS STACK
-
+---
 **Containerisierte Visualisierungsumgebung für Kroki API Service, PlantUML , Mermaid und Excalidraw**
 
 [![Docker](https://img.shields.io/badge/Docker-20.10%2B-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
@@ -11,16 +11,12 @@
 [![Mermaid](https://img.shields.io/badge/Mermaid-Live-ff3670.svg)](https://mermaid.js.org/)
 
 ---
-
-## 🎓 Über dieses Projekt
-
-**Lernprojekt** 
-
+> ### 🎓⚠️ **Work in progress / Lernprojekt**  
 ---
 
 ## 🎯 Überblick
 
-EKMP-C4-arch- Excallidraw, Kroki, Mermaid, PlantUML -C4 Architektur Visualisierung - ist eine vollständig lokale containerisierte Lösung für Architektur-Visualisierung und -Dokumentation. Die Umgebung vereint die Tools für "Architecture as Code" in einem einfach zu bedienenden Stack mit custom Features.
+EKMP-C4-arch- Excalidraw, Kroki, Mermaid, PlantUML -C4 Architektur Visualisierung - ist eine vollständig lokale containerisierte Lösung für Architektur-Visualisierung und -Dokumentation. Die Umgebung vereint die Tools für "Architecture as Code" in einem einfach zu bedienenden Stack mit custom Features.
 
 ### Features
 - 🏠 **Dashboard** - Zentraler Einstiegspunkt für alle Tools

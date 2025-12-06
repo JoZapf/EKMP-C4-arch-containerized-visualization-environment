@@ -1,90 +1,120 @@
-// Global Navigation Menu for EMPC4 VIS Stack
+/**
+ * Global Navigation Menu for EKMP-C4 ARCHITEKTUR VISUALISIERUNGS STACK
+ * Floating menu am rechten Bildschirmrand - konsistent für alle Services
+ * 
+ * Verwendung in MkDocs:
+ * 1. global-nav.css in extra_css einbinden
+ * 2. global-nav.js in extra_javascript einbinden
+ */
 
-document.addEventListener('DOMContentLoaded', function() {
-    // Create hamburger menu button
-    const navToggle = document.createElement('div');
-    navToggle.className = 'empc4-nav-toggle md-header__button';
-    navToggle.innerHTML = `
-        <div class="empc4-hamburger">
-            <span></span>
-            <span></span>
-            <span></span>
-        </div>
-    `;
-
-    // Create dropdown menu
-    const navMenu = document.createElement('div');
-    navMenu.className = 'empc4-nav-menu';
-    navMenu.innerHTML = `
-        <a href="/">
-            <span class="nav-icon">🏠</span>
-            <span>Dashboard</span>
-        </a>
-        <a href="/docs/index.html">
-            <span class="nav-icon">📚</span>
-            <span>Dokumentation</span>
-        </a>
-        <a href="/kroki">
-            <span class="nav-icon">🎯</span>
-            <span>Kroki Service</span>
-        </a>
-        <a href="/plantuml">
-            <span class="nav-icon">🎨</span>
-            <span>PlantUML Server</span>
-        </a>
-        <a href="/mermaid">
-            <span class="nav-icon">📊</span>
-            <span>Mermaid Editor</span>
-        </a>
-        <a href="/whiteboard">
-            <span class="nav-icon">✏️</span>
-            <span>Excalidraw Server</span>
-        </a>
-        <a href="http://localhost:8080" target="_blank">
-            <span class="nav-icon">⚙️</span>
-            <span>Traefik Dashboard</span>
-        </a>
-        <a href="https://github.com/JoZapf/EMPC4-containerized-visualization-environment" target="_blank">
-            <span class="nav-icon">💻</span>
-            <span>GitHub Repository</span>
-        </a>
-    `;
-
-    // Insert menu button into header (after search)
-    const header = document.querySelector('.md-header__inner');
-    if (header) {
-        header.appendChild(navToggle);
+(function() {
+    'use strict';
+    
+    // Warte bis DOM geladen ist
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initGlobalNav);
+    } else {
+        initGlobalNav();
+    }
+    
+    function initGlobalNav() {
+        // Prüfe ob Menü bereits existiert
+        if (document.querySelector('.empc4-nav-toggle')) {
+            return;
+        }
+        
+        // Create hamburger menu button
+        const navToggle = document.createElement('button');
+        navToggle.className = 'empc4-nav-toggle';
+        navToggle.setAttribute('aria-label', 'Navigation öffnen');
+        navToggle.setAttribute('aria-expanded', 'false');
+        navToggle.innerHTML = `
+            <div class="empc4-hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        `;
+        
+        // Create dropdown menu
+        const navMenu = document.createElement('nav');
+        navMenu.className = 'empc4-nav-menu';
+        navMenu.setAttribute('aria-label', 'Globale Navigation');
+        
+        // Get current path to mark active link
+        const currentPath = window.location.pathname;
+        
+        const navItems = [
+            { href: '/', icon: '🏠', text: 'Dashboard', id: 'dashboard' },
+            { href: '/docs/index.html', icon: '📚', text: 'Dokumentation', id: 'docs' },
+            { href: '/kroki', icon: '🎯', text: 'Kroki Service', id: 'kroki' },
+            { href: '/plantuml', icon: '🎨', text: 'PlantUML Server', id: 'plantuml' },
+            { href: '/mermaid', icon: '📊', text: 'Mermaid Editor', id: 'mermaid' },
+            { href: '/whiteboard', icon: '✏️', text: 'Excalidraw Server', id: 'whiteboard' },
+            { href: 'http://localhost:9090', icon: '⚙️', text: 'Traefik Dashboard', id: 'traefik', target: '_blank' },
+            { href: 'https://github.com/JoZapf/EMPC4-containerized-visualization-environment', icon: '💻', text: 'GitHub Repository', id: 'github', target: '_blank' }
+        ];
+        
+        navMenu.innerHTML = navItems.map(item => {
+            const isActive = currentPath === item.href || 
+                            (item.href !== '/' && currentPath.startsWith(item.href));
+            const target = item.target || '_self';
+            const activeClass = isActive ? ' active' : '';
+            
+            return `
+                <a href="${item.href}" 
+                   class="${activeClass}" 
+                   data-nav-id="${item.id}"
+                   ${target === '_blank' ? 'target="_blank" rel="noopener noreferrer"' : ''}>
+                    <span class="nav-icon">${item.icon}</span>
+                    <span>${item.text}</span>
+                </a>
+            `;
+        }).join('');
+        
+        // Insert into page
+        document.body.appendChild(navToggle);
         document.body.appendChild(navMenu);
-
+        
         // Toggle menu
         navToggle.addEventListener('click', function(e) {
             e.stopPropagation();
-            navToggle.classList.toggle('active');
+            const isActive = navToggle.classList.toggle('active');
             navMenu.classList.toggle('active');
+            navToggle.setAttribute('aria-expanded', isActive.toString());
         });
-
+        
         // Close menu when clicking outside
         document.addEventListener('click', function(e) {
             if (!navToggle.contains(e.target) && !navMenu.contains(e.target)) {
-                navToggle.classList.remove('active');
-                navMenu.classList.remove('active');
+                closeMenu();
             }
         });
-
-        // Close menu when clicking on a link
+        
+        // Close menu when clicking on a link (except external links)
         navMenu.querySelectorAll('a').forEach(link => {
-            link.addEventListener('click', function() {
-                navToggle.classList.remove('active');
-                navMenu.classList.remove('active');
+            link.addEventListener('click', function(e) {
+                const target = this.getAttribute('target');
+                if (target !== '_blank') {
+                    closeMenu();
+                }
             });
         });
-
+        
         // Close menu on escape key
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape' && navMenu.classList.contains('active')) {
-                navToggle.classList.remove('active');
-                navMenu.classList.remove('active');
+                closeMenu();
+                navToggle.focus(); // Return focus to button
             }
         });
+        
+        function closeMenu() {
+            navToggle.classList.remove('active');
+            navMenu.classList.remove('active');
+            navToggle.setAttribute('aria-expanded', 'false');
+        }
+        
+        console.log('[EMPC4] Global navigation initialized');
     }
-});
+})();
