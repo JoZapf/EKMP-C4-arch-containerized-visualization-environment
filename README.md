@@ -44,7 +44,7 @@ Die Mermaid Live Editor Integration wurde mit benutzerdefinierten Features erwei
 - pako-Kompression für State-Management
 - Automatische Button-Injection via Dockerfile
 
-📖 **Dokumentation:** [`docs/features/mermaid_save_load_features.md`](repo/features/mermaid_save_load_features.md)
+📖 **Dokumentation:** [`repo/docs/features/mermaid_save_load_features.md`](repo/docs/features/mermaid_save_load_features.md)
 
 ```
 ┌─────────────────────────────────────────────┐
@@ -63,7 +63,7 @@ Die Mermaid Live Editor Integration wurde mit benutzerdefinierten Features erwei
 `http://arch.local/`  
 
 - Port **80** (`arch.local`): Alle Hauptservices über Traefik Reverse Proxy
-- Port **8080** (`localhost:8080`): Nur Traefik Monitoring-Dashboard
+- Port **8080** (`localhost:9090`): Nur Traefik Monitoring-Dashboard
 
 
 
@@ -130,7 +130,7 @@ docker-compose ps
 ### ⚠️ Zugriff auf Services
 
 `http://arch.local/` als Basis-URL!  
-`http://localhost:8080/` Traefik Monitoring-Dashboard!
+`http://localhost:9090/` Traefik Monitoring-Dashboard!
 
 | Service | URL | Beschreibung |
 |---------|-----|--------------|
@@ -139,7 +139,7 @@ docker-compose ps
 | 🎨 **PlantUML** | http://arch.local/plantuml | Diagramm-Renderer |
 | 🌊 **Mermaid Live** | http://arch.local/mermaid | Interaktiver Editor (mit Save/Load) |
 | ✏️ **Whiteboard** | http://arch.local/whiteboard | Excalidraw |
-| 🔧 **Traefik** | http://localhost:8080 | Monitoring Dashboard |
+| 🔧 **Traefik** | http://localhost:9090 | Monitoring Dashboard |
 
 ### Dokumente
 
