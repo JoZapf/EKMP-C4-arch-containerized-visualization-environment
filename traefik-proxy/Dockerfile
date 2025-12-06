@@ -2,9 +2,11 @@
 # nginx acts as reverse proxy to Traefik Dashboard and injects navigation
 FROM nginx:stable-alpine
 
-# Copy global navigation files
+# Copy global navigation CSS (shared)
 COPY global-nav.css /usr/share/nginx/html/global-nav.css
-COPY global-nav.js /usr/share/nginx/html/global-nav.js
+
+# Copy Traefik-specific navigation JS (uses absolute URLs to arch.local)
+COPY traefik-proxy/global-nav.js /usr/share/nginx/html/global-nav.js
 
 # Copy nginx configuration
 COPY traefik-proxy/nginx.conf /etc/nginx/conf.d/default.conf
