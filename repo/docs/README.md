@@ -1,5 +1,5 @@
 # EKMP-C4 ARCHITEKTUR VISUALISIERUNGS STACK
----
+
 **Containerisierte Visualisierungsumgebung für Kroki API Service, PlantUML , Mermaid und Excalidraw**
 
 [![Docker](https://img.shields.io/badge/Docker-20.10%2B-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
@@ -11,12 +11,14 @@
 [![Mermaid](https://img.shields.io/badge/Mermaid-Live-ff3670.svg)](https://mermaid.js.org/)
 
 ---
-> ### 🎓⚠️ **Work in progress / Lernprojekt**  
+
+## 🎓 Über dieses **Lernprojekt**
+> ⚠️ **Work in progress:** services und docs befinden sich in Entwicklung.
 ---
 
 ## 🎯 Überblick
 
-EKMP-C4-arch- Excalidraw, Kroki, Mermaid, PlantUML -C4 Architektur Visualisierung - ist eine vollständig lokale containerisierte Lösung für Architektur-Visualisierung und -Dokumentation. Die Umgebung vereint die Tools für "Architecture as Code" in einem einfach zu bedienenden Stack mit custom Features.
+EKMP-C4-arch- Excallidraw, Kroki, Mermaid, PlantUML -C4 Architektur Visualisierung - ist eine vollständig lokale containerisierte Lösung für Architektur-Visualisierung und -Dokumentation. Die Umgebung vereint die Tools für "Architecture as Code" in einem einfach zu bedienenden Stack mit custom Features.
 
 ### Features
 - 🏠 **Dashboard** - Zentraler Einstiegspunkt für alle Tools
@@ -42,7 +44,7 @@ Die Mermaid Live Editor Integration wurde mit benutzerdefinierten Features erwei
 - pako-Kompression für State-Management
 - Automatische Button-Injection via Dockerfile
 
-📖 **Dokumentation:** [`docs/features/mermaid_save_load_features.md`](docs/features/mermaid_save_load_features.md)
+📖 **Dokumentation:** [`repo/docs/features/mermaid_save_load_features.md`](repo/docs/features/mermaid_save_load_features.md)
 
 ```
 ┌─────────────────────────────────────────────┐
@@ -61,7 +63,7 @@ Die Mermaid Live Editor Integration wurde mit benutzerdefinierten Features erwei
 `http://arch.local/`  
 
 - Port **80** (`arch.local`): Alle Hauptservices über Traefik Reverse Proxy
-- Port **8080** (`localhost:8080`): Nur Traefik Monitoring-Dashboard
+- Port **8080** (`localhost:9090`): Nur Traefik Monitoring-Dashboard
 
 
 
@@ -109,8 +111,10 @@ start http://arch.local/
 # 1. Umgebung konfigurieren
 Copy-Item .env.example .env
 
-# 2. Domain in hosts-Datei eintragen
-Add-Content -Path C:\Windows\System32\drivers\etc\hosts -Value "`n127.0.0.1    arch.local"
+# 2. Domain in hosts-Datei eintragen (falls nicht vorhanden)
+if (-not (Get-Content C:\Windows\System32\drivers\etc\hosts | Select-String "arch.local")) {
+    Add-Content -Path C:\Windows\System32\drivers\etc\hosts -Value "`n127.0.0.1`tarch.local"
+}
 
 # 3. Services starten
 docker-compose up -d
@@ -126,7 +130,7 @@ docker-compose ps
 ### ⚠️ Zugriff auf Services
 
 `http://arch.local/` als Basis-URL!  
-`http://localhost:8080/` Traefik Monitoring-Dashboard!
+`http://localhost:9090/` Traefik Monitoring-Dashboard!
 
 | Service | URL | Beschreibung |
 |---------|-----|--------------|
@@ -135,15 +139,15 @@ docker-compose ps
 | 🎨 **PlantUML** | http://arch.local/plantuml | Diagramm-Renderer |
 | 🌊 **Mermaid Live** | http://arch.local/mermaid | Interaktiver Editor (mit Save/Load) |
 | ✏️ **Whiteboard** | http://arch.local/whiteboard | Excalidraw |
-| 🔧 **Traefik** | http://localhost:8080 | Monitoring Dashboard |
+| 🔧 **Traefik** | http://localhost:9090 | Monitoring Dashboard |
 
 ### Dokumente
 
-- 📋 **[Runbook](runbook.md)** - Vollständige Betriebsanleitung
-- 🏗️ **[Architektur](docs/docu/empc4-vis-arch.md)** - Architektur-Übersicht
-- 🐳 **[Docker Compose](docs/docu/empc4-vis-arch_compose.md)** - Technische Details
+- 📋 **[Runbook](repo/docs/runbook.md)** - Vollständige Betriebsanleitung
+- 🏗️ **[Architektur](repo/docs//empc4-vis-arch.md)** - Architektur-Übersicht
+- 🐳 **[Docker Compose](repo/docs//empc4-vis-arch_compose.md)** - Technische Details
 - 🎨 **[C4-Diagramme](repo/c4/README.md)** - C4-PlantUML Beispiele
-- 🌊 **[Mermaid Features](docs/20251124_mermaid_save_load_features.md)** - Save/Load Dokumentation
+- 🌊 **[Mermaid Features](repo/docs/features/mermaid_save_load_features.md)** - Save/Load Dokumentation
 
 ---
 
@@ -200,40 +204,114 @@ docker-compose ps
 
 ```
 .
-├── docker-compose.yml       # Service-Definitionen
-├── .env.example             # Umgebungsvariablen (Vorlage)
-├── setup.sh                 # Automatisches Setup-Script
-├── runbook.md               # Umfassende Betriebsanleitung
-│
-├── dashboard/               # Dashboard-Frontend
-│   └── dist/
-│       └── index.html       # Hauptseite
-│
-├── mermaid-live/            # Mermaid Live Editor Container
-│   ├── Dockerfile           # Custom Build mit Save/Load Features
-│   └── nginx.conf
-│
-├── mermaid-save-override.js # Save Diagram Feature
-├── mermaid-load-button.js   # Load Diagram Feature
-│
-├── repo/                    # Git-Repository für Inhalte
-│   ├── mkdocs.yml           # MkDocs-Konfiguration
-│   ├── docs/                # Markdown-Dokumentation
-│   │   ├── index.md
-│   │   ├── architecture/
-│   │   └── examples/
-│   ├── c4/                  # C4-PlantUML-Diagramme
-│   │   ├── beispiel-context.puml
-│   │   ├── beispiel-container.puml
-│   │   └── README.md
-│   └── assets/              # Bilder, Exports
-│       └── excalidraw/
-│
-└── docs/                    # Technische Dokumentation
-    ├── docu/
-    │   ├── empc4-vis-arch.md
-    │   └── empc4-vis-arch_compose.md
-    └── 20251124_mermaid_save_load_features.md  # Feature-Dokumentation
+├── CHANGELOG.md
+├── DIAGNOSE_MKDOCS.sh
+├── Dockerfile.mkdocs
+├── README.md
+├── _project-tree-structure.txt
+├── dashboard
+│   └── dist
+│       ├── health-check.js
+│       └── index.html
+├── data
+│   └── letsencrypt
+├── docker-compose.yml
+├── docker-compose.yml.baseline
+├── excalidraw
+│   ├── Dockerfile
+│   └── nginx.conf
+├── fix-docs-routing.ps1
+├── global-nav.css
+├── global-nav.js
+├── kroki-frontend
+│   ├── global-nav.css
+│   ├── global-nav.js
+│   ├── index.html
+│   └── nginx.conf
+├── mermaid-ad-hide.css
+├── mermaid-debug.js
+├── mermaid-live
+│   ├── Dockerfile
+│   └── nginx.conf
+├── mermaid-load-button.js
+├── mermaid-save-override.js
+├── mkdocs-nginx.conf
+├── plantuml-proxy
+│   ├── Dockerfile
+│   └── nginx.conf
+├── plantuml-tools
+│   ├── Dockerfile
+│   ├── README.md
+│   └── plantuml-tools.py
+├── repo
+│   ├── assets
+│   │   └── excalidraw
+│   ├── c4
+│   │   ├── README.md
+│   │   ├── beispiel-component.puml
+│   │   ├── beispiel-container.puml
+│   │   └── beispiel-context.puml
+│   ├── docs
+│   │   ├── README.md
+│   │   ├── _templates
+│   │   │   ├── README.md
+│   │   │   ├── doc-header.md
+│   │   │   └── feature-header.md
+│   │   ├── architecture
+│   │   │   ├── c4-diagrams.md
+│   │   │   └── overview.md
+│   │   ├── empc4-vis-arch.md
+│   │   ├── empc4-vis-arch_compose.md
+│   │   ├── examples
+│   │   │   ├── c4.md
+│   │   │   ├── mermaid.md
+│   │   │   └── plantuml.md
+│   │   ├── features
+│   │   │   ├── mermaid_save_load_features.md
+│   │   │   ├── navigation-implementierung.md
+│   │   │   ├── plantuml-tools-implementation.md
+│   │   │   └── plantuml-tools-usage.md
+│   │   ├── index.md
+│   │   ├── javascripts
+│   │   │   └── global-nav.js
+│   │   ├── kroki.md
+│   │   ├── mkdocs-macros-demo.md
+│   │   ├── mkdocs-metadata-system.md
+│   │   ├── projekt
+│   │   │   └── changelog.md
+│   │   ├── runbook.md
+│   │   ├── setup
+│   │   │   ├── analysing_env_usage.md
+│   │   │   ├── dashboard-health-check.md
+│   │   │   ├── dashboard-quick-wins-phase1.md
+│   │   │   ├── dependencies.md
+│   │   │   ├── docker-befehle.md
+│   │   │   ├── macro-header-test.md
+│   │   │   ├── macro-test-minimal.md
+│   │   │   ├── metadata-example.md
+│   │   │   ├── metadata-final.md
+│   │   │   ├── metadata-test-simple.md
+│   │   │   ├── mkdocs-navigation-fix.md
+│   │   │   ├── mkdocs-usage.md
+│   │   │   ├── navigation-implementierung.md
+│   │   │   ├── navigation.md
+│   │   │   └── template-test-no-include.md
+│   │   └── stylesheets
+│   │       ├── global-nav.css
+│   │       └── navigation-indent.css
+│   ├── macros.py
+│   └── mkdocs.yml
+├── scripts
+│   ├── README.md
+│   ├── empc4_port_check.py
+│   ├── plantuml_encode.py
+│   └── requirements-plantuml.txt
+├── setup.ps1
+├── setup.sh
+└── traefik-proxy
+    ├── Dockerfile
+    ├── global-nav.js
+    └── nginx.conf
 ```
 
 ---
@@ -277,73 +355,11 @@ docker-compose ps
 
 ---
 
-### Falsche URL verwendet
-
-**Problem:** Links im Burger-Menü zeigen auf `localhost:8080`
-
-**Lösung:** Verwende die **richtige URL**!
-
-- ✅ **RICHTIG:** `http://arch.local/`
-- ❌ **FALSCH:** `http://localhost:8080/`
-
-**Warum?** Port 8080 ist nur für das Traefik Monitoring-Dashboard. Alle anderen Services laufen auf Port 80 via `arch.local`.
-
-**Details:** Siehe [`docs/URL_USAGE.md`](docs/URL_USAGE.md)
-
----
-
-### arch.local funktioniert nicht
-
-**Problem:** Browser kann `arch.local` nicht auflösen
-
-**Lösung:** Prüfe die hosts-Datei:
-
-**Windows:**
-```powershell
-# PowerShell als Administrator
-notepad C:\Windows\System32\drivers\etc\hosts
-
-# Sollte enthalten:
-127.0.0.1    arch.local
-```
-
-**Linux/macOS:**
-```bash
-sudo nano /etc/hosts
-
-# Sollte enthalten:
-127.0.0.1    arch.local
-```
-
-**Nach Änderung:** Browser neu starten!
-
----
-
-### PlantUML Bilder zu groß
-
-**Problem:** PlantUML-Diagramme werden abgeschnitten oder nicht gerendert
-
-**Lösung:** Erhöhe die Bildgröße in `.env`:
-
-```bash
-# Editiere .env
-PLANTUML_LIMIT_SIZE=16384  # Statt 8192
-```
-
-**Container neu starten:**
-```bash
-docker compose restart plantuml-backend
-```
-
----
-
-### Weitere Hilfe
-
 - **Port-Check:** `python scripts/empc4_port_check.py --suggest-fixes`
 - **Container-Status:** `docker compose ps`
 - **Container-Logs:** `docker compose logs <service-name>`
 - **Dependencies:** [Dokumentation](repo/docs/setup/dependencies.md)
-- **.env Analyse:** [`docs/20251127_analysing_env_usage.md`](docs/20251127_analysing_env_usage.md)
+- **.env Analyse:** [`repo/docs/setup/analysing_env_usage.md`](repo/docs/setup/analysing_env_usage.md)
 
 ---
 

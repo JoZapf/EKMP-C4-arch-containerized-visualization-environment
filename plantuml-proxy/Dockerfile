@@ -6,6 +6,9 @@ FROM nginx:stable-alpine
 COPY global-nav.css /usr/share/nginx/html/global-nav.css
 COPY global-nav.js /usr/share/nginx/html/global-nav.js
 
+# Copy PlantUML-specific CSS to hide GitHub banner
+COPY plantuml-hide.css /usr/share/nginx/html/plantuml-hide.css
+
 # Copy nginx configuration
 COPY plantuml-proxy/nginx.conf /etc/nginx/conf.d/default.conf
 

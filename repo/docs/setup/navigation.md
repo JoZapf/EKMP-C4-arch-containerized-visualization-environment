@@ -28,6 +28,50 @@
 
 Das globale Hamburger-Menü bietet eine konsistente Navigation über alle Services der EMPC4-Visualisierungsumgebung hinweg.
 
+```mermaid
+flowchart TB
+
+    subgraph Container["📦 <u>Service Container build</u>"]
+        C[nginx Server]
+        D[Original App<br>Mermaid, Excalidraw, etc.]
+        E[global-nav.css]
+        F[global-nav.js]
+    end
+
+    subgraph Injection["💉 <b>Non-invasive Injection</b>"]
+        G[HTML Response<br>+ injizierte Links]
+        H["&lt;link href='global-nav.css'&gt;<br>&lt;script src='global-nav.js'&gt;"]
+    end
+
+    subgraph Runtime["⚡ <b>Runtime DOM Manipulation</b>"]
+        I[DOMContentLoaded Event]
+        J[createElement: Button + Nav]
+        K[appendChild: body]
+        L[Event Listeners registrieren]
+    end
+
+    subgraph Result["✅ <b>Ergebnis</b><br>"]
+        M[Floating Burger-Menü<br>Rechter Rand, vertikal zentriert]
+        N[Einheitliche Navigation<br>über alle Services]
+    end
+
+    C --> D
+    C --> E
+    C --> F
+    D --> G
+    E --> G
+    F --> G
+    G --> H
+    H --> I
+    I --> J
+    J --> K
+    K --> L
+    L --> M
+    M --> N
+
+    style Injection fill:#009900,stroke:#ffffff
+
+```
 ### ✨ Features
 
 - **Konsistentes Design**: Glassmorphism-Effekt, vertikal zentriert am rechten Rand

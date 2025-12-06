@@ -6,7 +6,18 @@ Das vollständige Changelog findest du im Repository-Root:
 
 ---
 
-## Aktuelle Version: 1.4.0 (06.12.2025)
+## Aktuelle Version: 1.4.1 (06.12.2025)
+
+### Highlights
+
+**Gefixt:**
+- Traefik Dashboard: Redirect-Problem behoben (Port ging verloren)
+- Traefik Dashboard: Burger-Menü Links korrigiert (zeigen jetzt auf arch.local)
+- PlantUML: GitHub "Fork me" Banner wieder ausgeblendet (CSS-Injection)
+
+---
+
+## Version 1.4.0 (06.12.2025)
 
 ### Highlights
 

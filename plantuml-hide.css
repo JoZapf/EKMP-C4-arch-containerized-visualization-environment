@@ -1,0 +1,28 @@
+/* PlantUML Server - GitHub Banner und Werbung ausblenden */
+/* Robuste CSS-Lösung statt fragiler sub_filter String-Matches */
+
+/* GitHub "Fork me" Banner ausblenden */
+img[src*="github-fork-me"],
+img[alt="Fork me on GitHub"],
+map[name="github-banner"],
+area[href*="github.com/plantuml"] {
+    display: none !important;
+}
+
+/* Verstecke auch den umgebenden Container falls vorhanden */
+img[usemap="#github-banner"] {
+    display: none !important;
+}
+
+/* "Create your PlantUML diagrams" Paragraph ausblenden */
+/* Der Text enthält typischerweise einen Link zu plantuml.com */
+p:has(a[href="https://plantuml.com"]) {
+    display: none !important;
+}
+
+/* Fallback für Browser ohne :has() Support */
+/* Versteckt alle Links die auf plantuml.com verweisen im Header-Bereich */
+header p a[href="https://plantuml.com"],
+.header p a[href="https://plantuml.com"] {
+    display: none !important;
+}

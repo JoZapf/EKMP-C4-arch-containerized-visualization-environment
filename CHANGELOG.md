@@ -15,6 +15,43 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [1.4.1] - 2025-12-06
+
+### Fixed
+- **Traefik Dashboard Redirect**
+  - Problem: `http://localhost:9090/` leitete zu `http://localhost/dashboard/` (Port verloren)
+  - Ursache: Traefik interner Redirect ohne Port-Erhaltung
+  - Lösung: nginx macht Redirect selbst mit `$http_host` (enthält Port)
+
+- **Traefik Dashboard Burger-Menü Links**
+  - Problem: Alle Links zeigten auf `localhost:9090/...` statt `arch.local/...`
+  - Ursache: Globale `global-nav.js` mit relativen Pfaden
+  - Lösung: Separate `traefik-proxy/global-nav.js` mit absoluten URLs zu `http://arch.local/`
+
+- **PlantUML GitHub Banner wieder sichtbar**
+  - Problem: "Fork me on GitHub" Banner wurde nicht mehr ausgeblendet
+  - Ursache: `sub_filter` String-Match funktioniert nicht mehr (HTML-Struktur geändert)
+  - Lösung: CSS-Injection (`plantuml-hide.css`) - robuster als String-Matching
+
+### Technical
+- **Neue Dateien:**
+  - `traefik-proxy/global-nav.js` - Absolute URLs für Traefik Dashboard
+  - `plantuml-hide.css` - CSS zum Ausblenden von GitHub Banner
+
+- **Geänderte Dateien:**
+  - `traefik-proxy/nginx.conf` - Root-Redirect mit Port-Erhaltung
+  - `traefik-proxy/Dockerfile` - Lokale global-nav.js verwenden
+  - `plantuml-proxy/nginx.conf` - sub_filter entfernt, CSS-Injection
+  - `plantuml-proxy/Dockerfile` - plantuml-hide.css hinzugefügt
+
+- **Erforderliche Rebuilds:**
+  - `docker-compose build --no-cache traefik-dashboard plantuml`
+
+### Documentation
+- `docs/20251206_traefik_plantuml_fixes.md`
+
+---
+
 ## [1.4.0] - 2025-12-06
 
 ### Added
