@@ -15,6 +15,23 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [1.4.4] - 2025-02-07
+
+### Fixed
+- **Dashboard Health-Check zeigt Services dauerhaft als orange (checking)**
+  - Problem: Image-Trick mit favicon.ico funktioniert nicht für Services ohne Favicon
+  - Lösung: Same-Origin Services verwenden jetzt fetch() HEAD-Request, Cross-Origin weiterhin Image-Trick
+  - Betroffen: Dashboard, Docs, PlantUML, Kroki, Mermaid, Excalidraw zeigten orange statt grün
+
+### Technical
+- **Geänderte Dateien:**
+  - `dashboard/dist/health-check.js` - checkViaImage() umgeschrieben für Same-Origin fetch()
+
+- **Erforderliche Aktion:**
+  - `docker-compose restart dashboard`
+
+---
+
 ## [1.4.3] - 2025-02-07
 
 ### Fixed

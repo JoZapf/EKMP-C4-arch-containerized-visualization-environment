@@ -82,48 +82,90 @@ class ServiceHealthChecker {
     }
 
     /**
-     * Service-Check via Image-Trick (umgeht CORS)
-     * Versucht ein Favicon zu laden - wenn erfolgreich = Service erreichbar
+     * Service-Check via Fetch (Same-Origin) oder Image (Cross-Origin)
+     * Verwendet fetch() für Services auf gleicher Domain, Image-Trick für externe
      */
     async checkViaImage(url) {
-        return new Promise((resolve) => {
-            const img = new Image();
-            const timestamp = Date.now();
-            let resolved = false;
+        const timestamp = Date.now();
+        
+        // Prüfe ob Same-Origin (dann können wir fetch verwenden)
+        const isSameOrigin = url.startsWith('/') || url.startsWith(window.location.origin);
+        
+        if (isSameOrigin) {
+            // Same-Origin: Verwende fetch (kein CORS-Problem)
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), this.checkTimeout);
 
-            // Timeout handler
-            const timeoutId = setTimeout(() => {
-                if (!resolved) {
-                    resolved = true;
-                    resolve({ status: 'timeout', latency: this.checkTimeout });
+                const response = await fetch(url, {
+                    method: 'HEAD', // Nur Header, kein Body
+                    signal: controller.signal,
+                    cache: 'no-cache'
+                });
+
+                clearTimeout(timeoutId);
+                const latency = Date.now() - timestamp;
+
+                // Status 200-399 = Online, 400-599 = Erreichbar (warning)
+                if (response.ok) {
+                    return { status: 'online', latency };
+                } else {
+                    return { status: 'online', latency }; // Server antwortet = online
                 }
-            }, this.checkTimeout);
 
-            // Success handler
-            img.onload = () => {
-                if (!resolved) {
-                    resolved = true;
-                    clearTimeout(timeoutId);
-                    const latency = Date.now() - timestamp;
-                    resolve({ status: 'online', latency });
+            } catch (error) {
+                const latency = Date.now() - timestamp;
+                
+                if (error.name === 'AbortError') {
+                    return { status: 'timeout', latency };
                 }
-            };
+                
+                return { status: 'offline', latency, error: error.message };
+            }
+        } else {
+            // Cross-Origin: Verwende Image-Trick
+            return new Promise((resolve) => {
+                const img = new Image();
+                let resolved = false;
 
-            // Error handler (404, network error, etc.)
-            img.onerror = () => {
-                if (!resolved) {
-                    resolved = true;
-                    clearTimeout(timeoutId);
-                    const latency = Date.now() - timestamp;
-                    // 404 bedeutet: Server antwortet, aber Ressource fehlt
-                    // Das ist NICHT dasselbe wie "online" - zeige als Warnung
-                    resolve({ status: 'error', latency });
-                }
-            };
+                // Timeout handler
+                const timeoutId = setTimeout(() => {
+                    if (!resolved) {
+                        resolved = true;
+                        resolve({ status: 'timeout', latency: this.checkTimeout });
+                    }
+                }, this.checkTimeout);
 
-            // Start check - versuche Favicon zu laden
-            img.src = url + 'favicon.ico?' + timestamp;
-        });
+                // Success handler
+                img.onload = () => {
+                    if (!resolved) {
+                        resolved = true;
+                        clearTimeout(timeoutId);
+                        const latency = Date.now() - timestamp;
+                        resolve({ status: 'online', latency });
+                    }
+                };
+
+                // Error handler - bei Cross-Origin bedeutet jede Antwort "erreichbar"
+                img.onerror = () => {
+                    if (!resolved) {
+                        resolved = true;
+                        clearTimeout(timeoutId);
+                        const latency = Date.now() - timestamp;
+                        // Cross-Origin: onerror kann auch bei 200 OK ausgelöst werden
+                        // Wenn schnell = vermutlich online
+                        if (latency < 1000) {
+                            resolve({ status: 'online', latency });
+                        } else {
+                            resolve({ status: 'error', latency });
+                        }
+                    }
+                };
+
+                // Versuche Favicon zu laden
+                img.src = url + 'favicon.ico?' + timestamp;
+            });
+        }
     }
 
     /**
