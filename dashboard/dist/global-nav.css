@@ -1,0 +1,178 @@
+/* Global Navigation Menu for EMPC4 VIS Stack */
+/* Wiederverwendbar für alle Services */
+
+/* Hamburger Menu Button */
+.empc4-nav-toggle {
+    position: fixed;
+    top: 50%;
+    right: 0.8rem;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    cursor: pointer;
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.2s ease;
+    z-index: 9998;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.empc4-nav-toggle:hover {
+    background: rgba(0, 0, 0, 0.75);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-50%) scale(1.05);
+}
+
+.empc4-hamburger {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    width: 22px;
+}
+
+.empc4-hamburger span {
+    display: block;
+    height: 3px;
+    background: white;
+    border-radius: 2px;
+    transition: all 0.3s ease;
+}
+
+.empc4-nav-toggle.active {
+    background: rgba(0, 0, 0, 0.9);
+}
+
+.empc4-nav-toggle.active .empc4-hamburger span:nth-child(1) {
+    transform: rotate(45deg) translate(6px, 6px);
+}
+
+.empc4-nav-toggle.active .empc4-hamburger span:nth-child(2) {
+    opacity: 0;
+}
+
+.empc4-nav-toggle.active .empc4-hamburger span:nth-child(3) {
+    transform: rotate(-45deg) translate(6px, -6px);
+}
+
+/* Dropdown Menu */
+.empc4-nav-menu {
+    display: none;
+    position: fixed;
+    top: 50%;
+    right: 4.2rem;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 12px;
+    box-shadow:
+        0 0 0.2rem rgba(0,0,0,0.3),
+        0 0.4rem 0.8rem rgba(0,0,0,0.4),
+        0 0.8rem 1.6rem rgba(0,0,0,0.5);
+    min-width: 280px;
+    max-width: 90vw;
+    z-index: 9999;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.empc4-nav-menu.active {
+    display: block;
+    animation: slideDown 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-50%) translateX(20px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(-50%) translateX(0) scale(1);
+    }
+}
+
+.empc4-nav-menu a {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.2rem;
+    color: rgba(255, 255, 255, 0.9);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.empc4-nav-menu a:last-child {
+    border-bottom: none;
+}
+
+.empc4-nav-menu a:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: white;
+    padding-left: 1.4rem;
+}
+
+.empc4-nav-menu a .nav-icon {
+    font-size: 1.3rem;
+    flex-shrink: 0;
+    width: 1.5rem;
+    text-align: center;
+}
+
+/* Active indicator */
+.empc4-nav-menu a.active {
+    background: rgba(74, 158, 255, 0.15);
+    color: #4a9eff;
+    border-left: 3px solid #4a9eff;
+}
+
+/* Mobile adjustments */
+@media screen and (max-width: 768px) {
+    .empc4-nav-toggle {
+        top: 50%;
+        right: 0.5rem;
+        transform: translateY(-50%);
+    }
+    
+    .empc4-nav-toggle:hover {
+        transform: translateY(-50%) scale(1.05);
+    }
+    
+    .empc4-nav-menu {
+        /* On mobile, show menu at top instead of centered */
+        top: 1rem;
+        right: 0.5rem;
+        left: 0.5rem;
+        transform: none;
+        min-width: auto;
+        width: calc(100vw - 1rem);
+    }
+}
+
+/* Accessibility */
+.empc4-nav-toggle:focus-visible {
+    outline: 2px solid #4a9eff;
+    outline-offset: 2px;
+}
+
+.empc4-nav-menu a:focus-visible {
+    outline: 2px solid #4a9eff;
+    outline-offset: -2px;
+}
+
+/* Print media: hide menu */
+@media print {
+    .empc4-nav-toggle,
+    .empc4-nav-menu {
+        display: none !important;
+    }
+}
