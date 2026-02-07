@@ -15,6 +15,27 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [1.4.3] - 2025-02-07
+
+### Fixed
+- **Dashboard Navigation fehlte**
+  - Problem: global-nav.css und global-nav.js waren nicht im dashboard/dist/ Verzeichnis
+  - Lösung: Dateien von Root nach dashboard/dist/ kopiert, Pfade in index.html auf relativ geändert
+  - Betroffen: Dashboard-Seite konnte nicht laden
+
+### Technical
+- **Neue Dateien:**
+  - `dashboard/dist/global-nav.css`
+  - `dashboard/dist/global-nav.js`
+
+- **Geänderte Dateien:**
+  - `dashboard/dist/index.html` - Pfade von absolut (`/global-nav.css`) auf relativ (`global-nav.css`)
+
+- **Erforderliche Aktion:**
+  - `docker-compose restart dashboard`
+
+---
+
 ## [1.4.2] - 2025-12-06
 
 ### Fixed
