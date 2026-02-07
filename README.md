@@ -11,6 +11,11 @@
 [![Mermaid](https://img.shields.io/badge/Mermaid-Live-ff3670.svg)](https://mermaid.js.org/)
 
 ---
+<p align="center">
+  <img src="docs/EKMP-C4_web.jpg" width="1100" alt="EKMP-C4-arch- Excallidraw, Kroki, Mermaid, PlantUML -C4 Architektur Visualisierung">
+</p>
+
+---
 
 ## 🎓 Über dieses **Lernprojekt**
 > ⚠️ **Work in progress:** services und docs befinden sich in Entwicklung.
