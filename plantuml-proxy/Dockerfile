@@ -9,8 +9,12 @@ COPY global-nav.js /usr/share/nginx/html/global-nav.js
 # Copy PlantUML-specific CSS to hide GitHub banner
 COPY plantuml-hide.css /usr/share/nginx/html/plantuml-hide.css
 
-# Copy nginx configuration
+
+# Copy nginx configuration (main config with buffer limits)
+COPY config/plantuml-proxy/nginx.conf /etc/nginx/nginx.conf
 COPY plantuml-proxy/nginx.conf /etc/nginx/conf.d/default.conf
+# Copy nginx configuration
+#COPY plantuml-proxy/nginx.conf /etc/nginx/conf.d/default.conf
 
 # Healthcheck
 HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \

@@ -1,3 +1,19 @@
+# EMPC4 Architecture Visualization Stack - Ubuntu Production Deployment
+# Version: 1.1
+# Date: 2026-02-15
+# Target: Ubuntu 24.04.3 LTS 
+# Domain: arch.crea-think.local
+
+# ==========================================
+# PROJECT CONFIGURATION
+# ==========================================
+
+# name: empc4-vis-arch  # Explicit project name for namespace isolation
+
+# ==========================================
+# SERVICES
+# ==========================================
+
 services:
   reverse-proxy:
     image: traefik:v2.11
@@ -8,15 +24,31 @@ services:
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
       - "--accesslog=true"
-      - "--log.level=INFO"
+      - "--log.level=${TRAEFIK_LOG_LEVEL:-INFO}"
     ports:
-      - "${HTTP_PORT:-80}:80"
-      # Traefik Dashboard: Siehe traefik-dashboard Service (Port 8090)
+      # LOCALHOST ONLY binding for security
+      - "127.0.0.1:${HTTP_PORT}:80"
     volumes:
+      # Read-only Docker socket for security
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     networks:
       - empc4_net
-    restart: unless-stopped
+    restart: on-failure:3
+    # Resource Limits
+    mem_limit: 512m
+    mem_reservation: 256m
+    # Log Rotation
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    healthcheck:
+      test: ["CMD", "traefik", "healthcheck", "--ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
 
   # Traefik Dashboard Proxy with Global Navigation
   traefik-dashboard:
@@ -28,10 +60,20 @@ services:
     depends_on:
       - reverse-proxy
     ports:
-      - "${TRAEFIK_DASHBOARD_PORT:-8090}:80"  # Port 8090 statt 8080
+      # LOCALHOST ONLY binding - access via SSH tunnel
+      - "127.0.0.1:${TRAEFIK_DASHBOARD_PORT}:80"
     networks:
       - empc4_net
     restart: on-failure:3
+    # Resource Limits
+    mem_limit: 256m
+    mem_reservation: 128m
+    # Log Rotation
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:80/health"]
       interval: 30s
@@ -52,6 +94,15 @@ services:
     networks:
       - empc4_net
     restart: on-failure:3
+    # Resource Limits
+    mem_limit: 256m
+    mem_reservation: 128m
+    # Log Rotation
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://localhost:80/"]
       interval: 30s
@@ -66,11 +117,24 @@ services:
     environment:
       - PLANTUML_LIMIT_SIZE=${PLANTUML_LIMIT_SIZE:-8192}
       - BASE_URL=uml
+      # JAVA_TOOL_OPTIONS (NOT JAVA_OPTS!) - required for Docker Jetty read-only filesystem
+      # See: https://github.com/plantuml/plantuml-server/issues/503
+      # JAVA_OPTS and _JAVA_OPTIONS do NOT work in Docker Jetty
+      - JAVA_TOOL_OPTIONS=-Xmx3g -Xms1g -Djetty.httpConfig.requestHeaderSize=65536
     volumes:
       - "${ARCH_REPO_PATH:-./repo}:/repo:ro"
     networks:
       - empc4_net
     restart: on-failure:5
+    # Resource Limits (PlantUML needs more memory for large diagrams)
+    mem_limit: 6g
+    mem_reservation: 2g
+    # Log Rotation
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "3"
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080/uml/"]
       interval: 30s
@@ -107,6 +171,15 @@ services:
     networks:
       - empc4_net
     restart: on-failure:3
+    # Resource Limits
+    mem_limit: 512m
+    mem_reservation: 256m
+    # Log Rotation
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:80/health"]
       interval: 30s
@@ -136,6 +209,15 @@ services:
     networks:
       - empc4_net
     restart: on-failure:5
+    # Resource Limits
+    mem_limit: 1g
+    mem_reservation: 512m
+    # Log Rotation
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     healthcheck:
       # nginx receives requests without /docs/ prefix (Traefik strips it)
       test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:80/"]
@@ -165,6 +247,15 @@ services:
     networks:
       - empc4_net
     restart: on-failure:3
+    # Resource Limits
+    mem_limit: 256m
+    mem_reservation: 128m
+    # Log Rotation
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:80/"]
       interval: 30s
@@ -192,6 +283,15 @@ services:
     networks:
       - empc4_net
     restart: on-failure:3
+    # Resource Limits
+    mem_limit: 512m
+    mem_reservation: 256m
+    # Log Rotation
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:80/mermaid/"]
       interval: 30s
@@ -222,6 +322,15 @@ services:
     restart: on-failure:3
     depends_on:
       - kroki-backend
+    # Resource Limits
+    mem_limit: 256m
+    mem_reservation: 128m
+    # Log Rotation
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:80/"]
       interval: 30s
@@ -240,6 +349,15 @@ services:
     networks:
       - empc4_net
     restart: on-failure:3
+    # Resource Limits (Kroki processes complex diagrams)
+    mem_limit: 3g
+    mem_reservation: 1g
+    # Log Rotation
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:8000/healthz"]
       interval: 30s
@@ -254,6 +372,15 @@ services:
     networks:
       - empc4_net
     restart: on-failure:3
+    # Resource Limits
+    mem_limit: 512m
+    mem_reservation: 256m
+    # Log Rotation
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   # Kroki companion service for Mermaid diagrams
   kroki-mermaid:
@@ -262,6 +389,15 @@ services:
     networks:
       - empc4_net
     restart: on-failure:3
+    # Resource Limits
+    mem_limit: 512m
+    mem_reservation: 256m
+    # Log Rotation
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   # Kroki companion service for BPMN diagrams
   kroki-bpmn:
@@ -270,6 +406,15 @@ services:
     networks:
       - empc4_net
     restart: on-failure:3
+    # Resource Limits
+    mem_limit: 512m
+    mem_reservation: 256m
+    # Log Rotation
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   # PlantUML Tools - Python utilities for batch processing
   plantuml-tools:
@@ -286,10 +431,74 @@ services:
       - empc4_net
     depends_on:
       - plantuml-backend
+    # Resource Limits
+    mem_limit: 512m
+    mem_reservation: 256m
+    # Log Rotation
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     # No restart - this is a utility service (run manually)
     profiles:
       - tools
 
+  plantuml_sync:
+      build: ./plantuml-sync
+      container_name: empc4_plantuml_sync
+      hostname: plantuml-sync
+      networks:
+        - empc4_net
+      ports:
+        - "5001:5001"
+      restart: unless-stopped
+      environment:
+        - TZ=Europe/Berlin
+      healthcheck:
+        test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:5001/health')"]
+        interval: 30s
+        timeout: 5s
+        retries: 3
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.plantuml_sync.rule=Host(`${ARCH_BASE_DOMAIN}`) && PathPrefix(`/plantuml-sync`)"
+        - "traefik.http.services.plantuml_sync.loadbalancer.server.port=5001"
+
+
+# ==========================================
+# NETWORKS
+# ==========================================
+
 networks:
   empc4_net:
     driver: bridge
+    ipam:
+      config:
+        # Explicit subnet to avoid conflicts with existing Docker networks
+        # Existing networks use: 172.17-22.x.x and 172.30.10.x
+        # We use 172.23.0.0/16 (confirmed FREE)
+        - subnet: 172.23.0.0/16
+          gateway: 172.23.0.1
+
+# ==========================================
+# RESOURCE SUMMARY
+# ==========================================
+# Total Memory Allocation (max):
+# - Traefik: 512MB
+# - Traefik Dashboard: 256MB
+# - Dashboard: 256MB
+# - PlantUML Backend: 3GB
+# - PlantUML Proxy: 512MB
+# - MkDocs: 1GB
+# - Excalidraw: 256MB
+# - Mermaid: 512MB
+# - Kroki Frontend: 256MB
+# - Kroki Backend: 3GB
+# - Kroki BlockDiag: 512MB
+# - Kroki Mermaid: 512MB
+# - Kroki BPMN: 512MB
+# - PlantUML Tools: 512MB (profile: tools)
+# ========================================
+# TOTAL: ~11.5GB (of 19GB available)
+# ========================================
