@@ -20,6 +20,7 @@ services:
     container_name: empc4_reverse_proxy
     command:
       - "--api.insecure=true"
+      - "--ping=true"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
