@@ -151,7 +151,8 @@ services:
     image: empc4-plantuml-proxy:latest
     container_name: empc4_plantuml_proxy
     depends_on:
-      - plantuml-backend
+      plantuml-backend:
+        condition: service_healthy
     labels:
       - "traefik.enable=true"
       # Router für /plantuml Pfad
@@ -322,7 +323,8 @@ services:
       - empc4_net
     restart: on-failure:3
     depends_on:
-      - kroki-backend
+      kroki-backend:
+        condition: service_healthy
     # Resource Limits
     mem_limit: 256m
     mem_reservation: 128m
@@ -360,7 +362,7 @@ services:
         max-size: "10m"
         max-file: "3"
     healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:8000/healthz"]
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:8000/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -431,7 +433,8 @@ services:
     networks:
       - empc4_net
     depends_on:
-      - plantuml-backend
+      plantuml-backend:
+        condition: service_healthy
     # Resource Limits
     mem_limit: 512m
     mem_reservation: 256m
