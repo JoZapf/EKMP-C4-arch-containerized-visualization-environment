@@ -14,9 +14,14 @@ COPY plantuml-hide.css /usr/share/nginx/html/plantuml-hide.css
 # Copy collaboration client
 COPY plantuml-proxy/collab-client.js /usr/share/nginx/html/collab-client.js
 
-# Socket.IO client library (muss zur Server-Version passen: flask-socketio 5.x = socket.io-client 4.x)
-RUN wget -q -O /usr/share/nginx/html/socket.io.min.js \
-    https://cdn.jsdelivr.net/npm/socket.io-client@4/dist/socket.io.min.js
+# Socket.IO client library - in IIFE einwickeln damit Monaco's AMD-Loader nicht die define()-Funktion
+# kapert und window.io nicht gesetzt wird (UMD erkennt define.amd und nutzt AMD statt global)
+RUN wget -q -O /tmp/socket.io.min.js \
+    https://cdn.jsdelivr.net/npm/socket.io-client@4/dist/socket.io.min.js && \
+    echo '(function(){var _def=window.define;window.define=undefined;' > /usr/share/nginx/html/socket.io.min.js && \
+    cat /tmp/socket.io.min.js >> /usr/share/nginx/html/socket.io.min.js && \
+    echo 'window.define=_def;})();' >> /usr/share/nginx/html/socket.io.min.js && \
+    rm /tmp/socket.io.min.js
 
 # Copy nginx configuration
 COPY plantuml-proxy/nginx.conf /etc/nginx/conf.d/default.conf
