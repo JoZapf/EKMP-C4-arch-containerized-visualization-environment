@@ -157,10 +157,10 @@ class PlantUMLSyncNamespace(Namespace):
         logger.info(f"[/plantuml-sync] {request.sid} joined room '{room}' ({len(rooms_data[room]['users'])} users)")
         if rooms_data[room]['text']:
             self.emit('diagram_update', {'text': rooms_data[room]['text'], 'cursor': None})
-        self.emit('user_joined', {
+        socketio.emit('user_joined', {
             'sid': request.sid,
             'users_count': len(rooms_data[room]['users'])
-        }, room=room, skip_sid=request.sid)
+        }, room=room, skip_sid=request.sid, namespace='/plantuml-sync')
 
     def on_leave(self, data):
         _on_leave(data)
@@ -178,16 +178,16 @@ class PlantUMLSyncNamespace(Namespace):
             rooms_data[room]['users'].add(request.sid)
         rooms_data[room]['text'] = text
         logger.info(f"[/plantuml-sync] diagram_update from {request.sid} in room '{room}': {len(text)} chars, {len(rooms_data[room]['users'])} users")
-        self.emit('diagram_update', {
+        socketio.emit('diagram_update', {
             'text': text,
             'cursor': cursor,
             'from_sid': request.sid
-        }, room=room, skip_sid=request.sid)
+        }, room=room, skip_sid=request.sid, namespace='/plantuml-sync')
 
     def on_cursor_update(self, data):
         room = data.get('room', 'default')
         cursor = data.get('cursor')
-        self.emit('cursor_update', {'cursor': cursor, 'from_sid': request.sid}, room=room, skip_sid=request.sid)
+        socketio.emit('cursor_update', {'cursor': cursor, 'from_sid': request.sid}, room=room, skip_sid=request.sid, namespace='/plantuml-sync')
 
 socketio.on_namespace(PlantUMLSyncNamespace('/plantuml-sync'))
 
