@@ -471,7 +471,7 @@ services:
         max-size: "10m"
         max-file: "3"
     healthcheck:
-      test: ["CMD", "wget", "-O", "/dev/null", "-q", "http://localhost:5001/health"]
+      test: ["CMD", "python", "-c", "import requests, sys; r=requests.get('http://localhost:5001/health', timeout=3); sys.exit(0 if r.status_code==200 else 1)"]
       interval: 30s
       timeout: 5s
       retries: 3

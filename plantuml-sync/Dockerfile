@@ -17,9 +17,9 @@ COPY app.py /app/
 # Expose WebSocket port
 EXPOSE 5001
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-    CMD python -c "import requests; requests.get('http://localhost:5001/health')" || exit 1
+# Health check - requests ist bereits installiert
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+    CMD python -c "import requests, sys; r=requests.get('http://localhost:5001/health', timeout=3); sys.exit(0 if r.status_code==200 else 1)"
 
 # Run application
 CMD ["python", "app.py"]
