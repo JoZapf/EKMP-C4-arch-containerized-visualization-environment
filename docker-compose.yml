@@ -153,6 +153,8 @@ services:
     depends_on:
       plantuml-backend:
         condition: service_healthy
+      plantuml-sync:
+        condition: service_healthy
     labels:
       - "traefik.enable=true"
       # Router für /plantuml Pfad
@@ -448,26 +450,32 @@ services:
     profiles:
       - tools
 
-  plantuml_sync:
-      build: ./plantuml-sync
-      container_name: empc4_plantuml_sync
-      hostname: plantuml-sync
-      networks:
-        - empc4_net
-      ports:
-        - "5001:5001"
-      restart: unless-stopped
-      environment:
-        - TZ=Europe/Berlin
-      healthcheck:
-        test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:5001/health')"]
-        interval: 30s
-        timeout: 5s
-        retries: 3
-      labels:
-        - "traefik.enable=true"
-        - "traefik.http.routers.plantuml_sync.rule=Host(`${ARCH_BASE_DOMAIN}`) && PathPrefix(`/plantuml-sync`)"
-        - "traefik.http.services.plantuml_sync.loadbalancer.server.port=5001"
+  # PlantUML Collaboration Server - WebSocket-basierte Echtzeit-Synchronisation
+  plantuml-sync:
+    build: ./plantuml-sync
+    image: empc4-vis-arch-plantuml_sync:latest
+    container_name: empc4_plantuml_sync
+    hostname: plantuml-sync
+    networks:
+      - empc4_net
+    restart: on-failure:3
+    environment:
+      - TZ=Europe/Berlin
+    # Resource Limits
+    mem_limit: 256m
+    mem_reservation: 128m
+    # Log Rotation
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    healthcheck:
+      test: ["CMD", "wget", "-O", "/dev/null", "-q", "http://localhost:5001/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
 
 
 # ==========================================
