@@ -470,6 +470,18 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+    labels:
+      - "traefik.enable=true"
+      # Route für /plantuml-sync (HTTP API + Socket.IO polling)
+      - "traefik.http.routers.plantuml-sync.rule=Host(`${ARCH_BASE_DOMAIN}`) && PathPrefix(`/plantuml-sync`)"
+      - "traefik.http.routers.plantuml-sync.entrypoints=web"
+      - "traefik.http.routers.plantuml-sync.priority=20"
+      - "traefik.http.services.plantuml-sync.loadbalancer.server.port=5001"
+      # Route für /socket.io (Socket.IO default path - sync.js verbindet hierher)
+      - "traefik.http.routers.plantuml-sync-socketio.rule=Host(`${ARCH_BASE_DOMAIN}`) && PathPrefix(`/socket.io`)"
+      - "traefik.http.routers.plantuml-sync-socketio.entrypoints=web"
+      - "traefik.http.routers.plantuml-sync-socketio.priority=20"
+      - "traefik.http.routers.plantuml-sync-socketio.service=plantuml-sync"
     healthcheck:
       test: ["CMD", "python", "-c", "import requests, sys; r=requests.get('http://localhost:5001/health', timeout=3); sys.exit(0 if r.status_code==200 else 1)"]
       interval: 30s
