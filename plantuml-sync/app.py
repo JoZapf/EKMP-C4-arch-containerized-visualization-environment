@@ -29,7 +29,9 @@ socketio = SocketIO(
     cors_allowed_origins="*",
     async_mode='eventlet',
     logger=True,
-    engineio_logger=False  # Too verbose
+    engineio_logger=False,  # Too verbose
+    # Alle Namespaces akzeptieren - sync.js nutzt /plantuml-sync als Namespace
+    namespaces='*'
 )
 
 # Store diagram state per room
