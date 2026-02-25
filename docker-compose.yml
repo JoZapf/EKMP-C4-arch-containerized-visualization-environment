@@ -362,7 +362,7 @@ services:
         max-size: "10m"
         max-file: "3"
     healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:8000/health"]
+      test: ["CMD", "wget", "-O", "/dev/null", "-q", "http://127.0.0.1:8000/health"]
       interval: 30s
       timeout: 10s
       retries: 3
