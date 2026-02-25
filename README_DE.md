@@ -1,6 +1,6 @@
-# EMPC4 Architecture Visualization Stack
+# EMPC4 Architektur-Visualisierungs-Stack
 
-**Containerized visualization environment for PlantUML, Mermaid, Excalidraw, and Kroki**
+**Containerisierte Visualisierungsumgebung für PlantUML, Mermaid, Excalidraw und Kroki**
 
 [![Docker](https://img.shields.io/badge/Docker-20.10%2B-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
 [![Docker Compose](https://img.shields.io/badge/Docker%20Compose-2.0%2B-2496ED?logo=docker&logoColor=white)](https://docs.docker.com/compose/)
@@ -8,31 +8,31 @@
 [![Version](https://img.shields.io/badge/Version-1.5.0-blue.svg)](CHANGELOG.md)
 [![PlantUML](https://img.shields.io/badge/PlantUML-Collab-yellowgreen.svg)](https://plantuml.com/)
 [![Mermaid](https://img.shields.io/badge/Mermaid-Live-ff3670.svg)](https://mermaid.js.org/)
-[![Learning Project](https://img.shields.io/badge/🎓-Learning%20Project-orange.svg)](#about)
+[![Learning Project](https://img.shields.io/badge/🎓-Lernprojekt-orange.svg)](#über-das-projekt)
 
-> 🇩🇪 [Deutsche Version](README_DE.md)
+> 🇬🇧 [English version](README.md)
 
 <p align="center">
-  <img src="docs/EKMP-C4_web.jpg" width="900" alt="EMPC4 Architecture Visualization Stack">
+  <img src="docs/EKMP-C4_web.jpg" width="900" alt="EMPC4 Architektur-Visualisierungs-Stack">
 </p>
 
 ---
 
-## ✨ New: Real-Time Collaboration
+## ✨ Neu: Echtzeit-Kollaboration
 
 <table>
 <tr>
 <td width="50%">
 
-### PlantUML Live Collaboration
-**Multiple users can edit the same diagram simultaneously!**
+### PlantUML Live-Kollaboration
+**Mehrere Benutzer können dasselbe Diagramm gleichzeitig bearbeiten!**
 
-- 🔄 **Real-time sync** via WebSocket (Socket.IO)
-- 👥 **Multi-device editing** - Windows, Linux, Mac
-- 🔒 **Self-hosted** - no cloud dependency
-- ⚡ **Instant updates** - see changes as they happen
+- 🔄 **Echtzeit-Synchronisation** via WebSocket (Socket.IO)
+- 👥 **Multi-Gerät-Bearbeitung** – Windows, Linux, Mac
+- 🔒 **Self-hosted** – keine Cloud-Abhängigkeit
+- ⚡ **Sofortige Updates** – Änderungen live sehen
 
-Built with Flask-SocketIO + eventlet, integrated into the existing PlantUML Monaco Editor.
+Umgesetzt mit Flask-SocketIO + eventlet, integriert in den bestehenden PlantUML Monaco Editor.
 
 </td>
 <td width="50%">
@@ -61,48 +61,48 @@ Built with Flask-SocketIO + eventlet, integrated into the existing PlantUML Mona
 </tr>
 </table>
 
-📖 **Architecture Diagrams:** [`docs/architecture/`](repo/docs/architecture/)
+📖 **Architektur-Diagramme:** [`docs/architecture/`](repo/docs/architecture/)
 
 ---
 
-## 🎯 Overview
+## 🎯 Überblick
 
-A fully local, containerized solution for architecture visualization and documentation. Combines "Architecture as Code" tools in one easy-to-use stack with custom enhancements.
+Eine vollständig lokale, containerisierte Lösung für Architektur-Visualisierung und -Dokumentation. Vereint "Architecture as Code"-Tools in einem einfach zu bedienenden Stack mit eigenen Erweiterungen.
 
-| Service | Description | Custom Features |
-|---------|-------------|-----------------|
-| 🏠 **Dashboard** | Central entry point | Health monitoring |
-| 🎨 **PlantUML** | UML & C4 diagrams | **Real-time collaboration** |
-| 🌊 **Mermaid Live** | Interactive diagrams | Save/Load local files |
-| ✏️ **Excalidraw** | Whiteboard sketching | Global navigation |
-| 🎯 **Kroki** | Multi-format API | CI/CD integration |
-| 📚 **MkDocs** | Documentation | Mermaid support |
-| 🔀 **Traefik** | Reverse proxy | Auto-discovery |
+| Service | Beschreibung | Eigene Features |
+|---------|--------------|-----------------|
+| 🏠 **Dashboard** | Zentraler Einstiegspunkt | Health-Monitoring |
+| 🎨 **PlantUML** | UML & C4-Diagramme | **Echtzeit-Kollaboration** |
+| 🌊 **Mermaid Live** | Interaktive Diagramme | Lokales Speichern/Laden |
+| ✏️ **Excalidraw** | Whiteboard-Skizzen | Globale Navigation |
+| 🎯 **Kroki** | Multi-Format-API | CI/CD-Integration |
+| 📚 **MkDocs** | Dokumentation | Mermaid-Support |
+| 🔀 **Traefik** | Reverse Proxy | Auto-Discovery |
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Schnellstart
 
 ```bash
-# Clone
+# Klonen
 git clone https://github.com/JoZapf/EMPC4-containerized-visualization-environment.git
 cd EMPC4-containerized-visualization-environment
 
 # Setup (Linux/macOS)
 ./setup.sh
 
-# Setup (Windows PowerShell as Admin)
+# Setup (Windows PowerShell als Admin)
 .\setup.ps1
 
-# Open browser
+# Browser öffnen
 # http://arch.local/
 ```
 
-**Requirements:** Docker 20.10+, Docker Compose 2.0+, 4GB RAM (8GB recommended)
+**Voraussetzungen:** Docker 20.10+, Docker Compose 2.0+, 4GB RAM (8GB empfohlen)
 
 ---
 
-## 📖 Service URLs
+## 📖 Service-URLs
 
 | Service | URL |
 |---------|-----|
@@ -111,24 +111,24 @@ cd EMPC4-containerized-visualization-environment
 | Mermaid | http://arch.local/mermaid |
 | Excalidraw | http://arch.local/whiteboard |
 | Kroki | http://arch.local/kroki |
-| Docs | http://arch.local/docs/ |
+| Dokumentation | http://arch.local/docs/ |
 | Traefik | http://localhost:9090 |
 
 ---
 
-## 🏗️ Architecture
+## 🏗️ Architektur
 
 ```
 ┌──────────────────────────────────────────────────────────┐
 │                    Host: arch.local                       │
 │  ┌────────────────────────────────────────────────────┐  │
 │  │              Traefik Reverse Proxy                 │  │
-│  │         PathPrefix Routing + Health Checks         │  │
+│  │         PathPrefix-Routing + Health Checks         │  │
 │  └─────────────────────┬──────────────────────────────┘  │
 │           /uml    /mermaid   /whiteboard   /kroki        │
 │             │         │          │           │           │
 │  ┌──────────┴─────────┴──────────┴───────────┴────────┐  │
-│  │                  Docker Network                     │  │
+│  │                  Docker-Netzwerk                    │  │
 │  │  ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐   │  │
 │  │  │PlantUML │ │ Mermaid │ │Excalidraw│ │  Kroki  │   │  │
 │  │  │ +Sync   │ │  Live   │ │         │ │+Backends│   │  │
@@ -139,79 +139,79 @@ cd EMPC4-containerized-visualization-environment
 
 ---
 
-## 📦 Project Structure
+## 📦 Projektstruktur
 
 ```
 .
-├── dashboard/          # Central dashboard with health checks
-├── plantuml-proxy/     # PlantUML nginx proxy + script injection
-├── plantuml-sync/      # WebSocket collaboration server (NEW)
-├── mermaid-live/       # Mermaid with save/load features
-├── excalidraw/         # Whiteboard service
-├── kroki-frontend/     # Kroki API frontend
-├── traefik-proxy/      # Traefik dashboard proxy
+├── dashboard/          # Zentrales Dashboard mit Health-Checks
+├── plantuml-proxy/     # PlantUML nginx-Proxy + Script-Injection
+├── plantuml-sync/      # WebSocket-Kollaborations-Server (NEU)
+├── mermaid-live/       # Mermaid mit Speichern/Laden-Features
+├── excalidraw/         # Whiteboard-Service
+├── kroki-frontend/     # Kroki-API-Frontend
+├── traefik-proxy/      # Traefik-Dashboard-Proxy
 ├── repo/
-│   ├── docs/           # MkDocs documentation
-│   └── c4/             # C4-PlantUML examples
-├── scripts/            # Utility scripts
-└── docker-compose.yml  # Stack definition
+│   ├── docs/           # MkDocs-Dokumentation
+│   └── c4/             # C4-PlantUML-Beispiele
+├── scripts/            # Hilfs-Skripte
+└── docker-compose.yml  # Stack-Definition
 ```
 
 ---
 
-## 🔧 Troubleshooting
+## 🔧 Fehlerbehebung
 
 ```bash
-# Check status
+# Status prüfen
 docker compose ps
 
-# View logs
+# Logs anzeigen
 docker compose logs <service-name>
 
-# Port conflicts
+# Port-Konflikte
 python scripts/empc4_port_check.py --suggest-fixes
 
-# Rebuild specific service
+# Service neu bauen
 docker compose build --no-cache <service-name>
 docker compose up -d <service-name>
 ```
 
 ---
 
-## 📚 Documentation
+## 📚 Dokumentation
 
-- [Runbook](repo/docs/runbook.md) - Operations guide
-- [Architecture](repo/docs/empc4-vis-arch.md) - System overview
-- [Docker Commands](repo/docs/setup/docker-befehle.md) - Reference
-- [Dependencies](repo/docs/setup/dependencies.md) - Software stack
-- [Mermaid Features](repo/docs/features/mermaid_save_load_features.md) - Save/Load docs
-
----
-
-## 🔒 Security
-
-- ✅ Docker Socket read-only (Traefik)
-- ✅ Minimal volume permissions
-- ✅ Network isolation via Docker
-- ✅ Health checks for all services
-- ✅ Client-side processing (no external API calls)
+- [Runbook](repo/docs/runbook.md) – Betriebsanleitung
+- [Architektur](repo/docs/empc4-vis-arch.md) – Systemübersicht
+- [Docker-Befehle](repo/docs/setup/docker-befehle.md) – Referenz
+- [Dependencies](repo/docs/setup/dependencies.md) – Software-Stack
+- [Mermaid-Features](repo/docs/features/mermaid_save_load_features.md) – Speichern/Laden-Doku
 
 ---
 
-## About
+## 🔒 Sicherheit
 
-**Learning Project** - Created during vocational training as IT Specialist for Application Development (Fachinformatiker für Anwendungsentwicklung). Practical environment for modern DevOps practices and container technologies.
-
-**Author:** [JoZapf](https://github.com/JoZapf)
+- ✅ Docker-Socket read-only (Traefik)
+- ✅ Minimale Volume-Berechtigungen
+- ✅ Netzwerk-Isolation via Docker
+- ✅ Health-Checks für alle Services
+- ✅ Client-seitige Verarbeitung (keine externen API-Aufrufe)
 
 ---
 
-## License
+## Über das Projekt
 
-MIT License - see [LICENSE](LICENSE)
+**Lernprojekt** – Entstanden während der Umschulung zum Fachinformatiker für Anwendungsentwicklung. Praktische Übungsumgebung für moderne DevOps-Praktiken und Container-Technologien.
+
+**Autor:** [JoZapf](https://github.com/JoZapf)
+
+---
+
+## Lizenz
+
+MIT-Lizenz – siehe [LICENSE](LICENSE)
 
 ---
 
 <p align="center">
-  <b>Built with ❤️ for better architecture documentation</b>
+  <b>Erstellt mit ❤️ für bessere Architektur-Dokumentation</b>
 </p>

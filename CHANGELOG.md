@@ -1,33 +1,74 @@
-# Changelog EKMP-C4 ARCHITEKTUR VISUALISIERUNGS STACK
+# Changelog EKMP-C4 Architecture Visualization Stack
 
-Alle nennenswerten Änderungen am EKMP-C4 Architektur-Visualisierungs Stack werden in dieser Datei dokumentiert.
+All notable changes to the EMPC4 Architecture Visualization Stack are documented in this file.
 
-Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
+Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
 ## [Unreleased]
 
-### Geplant
-- PlantUML Server-Side Includes (SSI) Analyse
-- LaTeX-Integration für wissenschaftliche Dokumentation
-- Automatische Architektur-Diagramm Generierung
+### Planned
+- PlantUML Server-Side Includes (SSI) Analysis
+- LaTeX integration for scientific documentation
+- Automatic architecture diagram generation
+
+---
+
+## [1.5.0] - 2025-02-25
+
+### Added
+- **PlantUML Real-Time Collaboration**
+  - WebSocket-based live sync between multiple clients
+  - Flask-SocketIO server with eventlet async mode
+  - Room-based synchronization (same URL = same room)
+  - Cursor position sharing between users
+  - Automatic reconnection handling
+
+### Technical
+- **New Container:** `plantuml-sync` (Flask-SocketIO + eventlet)
+  - Namespace `/plantuml-sync` for Socket.IO events
+  - Events: `join`, `diagram_update`, `cursor_update`, `disconnect`
+  - In-memory room management via `rooms_data` dict
+
+- **Modified Container:** `plantuml-proxy`
+  - Socket.IO client injection via IIFE wrapper (AMD compatibility fix)
+  - Script injection: `socket.io.min.js`, `collab-client.js`
+
+- **Host nginx Routes:**
+  - `/socket.io/` → Traefik → plantuml-sync:5001
+  - `/plantuml-sync/` → Traefik → plantuml-sync:5001
+
+- **Traefik Labels:**
+  - `plantuml-sync` router for `/plantuml-sync` path
+  - `plantuml-sync-socketio` router for `/socket.io` path
+
+- **Critical Implementation Details:**
+  - `eventlet.monkey_patch()` must be FIRST import in app.py
+  - Socket.IO Namespace ≠ URL Path (namespace is logical, path is `/socket.io/`)
+  - IIFE wrapper required to prevent AMD loader conflict with Monaco Editor
+
+### Documentation
+- Architecture diagrams: `plantuml-collab-architecture.puml`
+- Sequence diagram: `plantuml-collab-sequence.puml`
+- Deployment diagram: `plantuml-collab-deployment.puml`
+- Fixes summary: `plantuml-collab-fixes-summary.puml`
 
 ---
 
 ## [1.4.4] - 2025-02-07
 
 ### Fixed
-- **Dashboard Health-Check zeigt Services dauerhaft als orange (checking)**
-  - Problem: Image-Trick mit favicon.ico funktioniert nicht für Services ohne Favicon
-  - Lösung: Same-Origin Services verwenden jetzt fetch() HEAD-Request, Cross-Origin weiterhin Image-Trick
-  - Betroffen: Dashboard, Docs, PlantUML, Kroki, Mermaid, Excalidraw zeigten orange statt grün
+- **Dashboard Health-Check shows services as orange (checking)**
+  - Problem: Image-trick with favicon.ico doesn't work for services without favicon
+  - Solution: Same-Origin services now use fetch() HEAD-request, Cross-Origin still uses image-trick
+  - Affected: Dashboard, Docs, PlantUML, Kroki, Mermaid, Excalidraw showed orange instead of green
 
 ### Technical
-- **Geänderte Dateien:**
-  - `dashboard/dist/health-check.js` - checkViaImage() umgeschrieben für Same-Origin fetch()
+- **Changed files:**
+  - `dashboard/dist/health-check.js` - checkViaImage() rewritten for Same-Origin fetch()
 
-- **Erforderliche Aktion:**
+- **Required action:**
   - `docker-compose restart dashboard`
 
 ---
@@ -35,20 +76,20 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 ## [1.4.3] - 2025-02-07
 
 ### Fixed
-- **Dashboard Navigation fehlte**
-  - Problem: global-nav.css und global-nav.js waren nicht im dashboard/dist/ Verzeichnis
-  - Lösung: Dateien von Root nach dashboard/dist/ kopiert, Pfade in index.html auf relativ geändert
-  - Betroffen: Dashboard-Seite konnte nicht laden
+- **Dashboard navigation missing**
+  - Problem: global-nav.css and global-nav.js were not in dashboard/dist/ directory
+  - Solution: Files copied from root to dashboard/dist/, paths in index.html changed to relative
+  - Affected: Dashboard page could not load
 
 ### Technical
-- **Neue Dateien:**
+- **New files:**
   - `dashboard/dist/global-nav.css`
   - `dashboard/dist/global-nav.js`
 
-- **Geänderte Dateien:**
-  - `dashboard/dist/index.html` - Pfade von absolut (`/global-nav.css`) auf relativ (`global-nav.css`)
+- **Changed files:**
+  - `dashboard/dist/index.html` - paths from absolute (`/global-nav.css`) to relative (`global-nav.css`)
 
-- **Erforderliche Aktion:**
+- **Required action:**
   - `docker-compose restart dashboard`
 
 ---
@@ -56,29 +97,26 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 ## [1.4.2] - 2025-12-06
 
 ### Fixed
-- **Kroki global-nav.css/js 404-Fehler**
-  - Problem: Browser fragte `/global-nav.css` statt `/kroki/global-nav.css`
-  - Ursache: Traefik stripped `/kroki` Prefix, aber HTML hatte absolute Pfade ohne Prefix
-  - Lösung: Pfade in `kroki-frontend/index.html` auf `/kroki/global-nav.*` geändert
+- **Kroki global-nav.css/js 404 errors**
+  - Problem: Browser requested `/global-nav.css` instead of `/kroki/global-nav.css`
+  - Cause: Traefik strips `/kroki` prefix, but HTML had absolute paths without prefix
+  - Solution: Paths in `kroki-frontend/index.html` changed to `/kroki/global-nav.*`
 
-- **Health-Check Traefik Ports falsch**
-  - Problem: Health-Check fragte Port 8080 statt 9090
-  - Lösung: URLs in `health-check.js` auf Port 9090 aktualisiert
+- **Health-Check Traefik ports wrong**
+  - Problem: Health-Check queried port 8080 instead of 9090
+  - Solution: URLs in `health-check.js` updated to port 9090
 
-- **Health-Check zeigt "online" bei 404**
-  - Problem: `img.onerror` gab `status: 'online'` zurück (Design-Fehler)
-  - Lösung: Neuer Status `error` mit gelber `warning`-Anzeige
+- **Health-Check shows "online" for 404**
+  - Problem: `img.onerror` returned `status: 'online'` (design flaw)
+  - Solution: New status `error` with yellow `warning` display
 
 ### Technical
-- **Geänderte Dateien:**
-  - `kroki-frontend/index.html` - Pfade für global-nav
-  - `dashboard/dist/health-check.js` - Ports + Error-Handling
-  - `dashboard/dist/index.html` - CSS für `.warning` Status
+- **Changed files:**
+  - `kroki-frontend/index.html` - paths for global-nav
+  - `dashboard/dist/health-check.js` - ports + error handling
+  - `dashboard/dist/index.html` - CSS for `.warning` status
 
-- **Kein Rebuild erforderlich** - Dateien sind per Volume gemounted
-
-### Documentation
-- `docs/20251206_kroki_healthcheck_fixes.md`
+- **No rebuild required** - files are volume mounted
 
 ---
 
@@ -86,118 +124,83 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ### Fixed
 - **Traefik Dashboard Redirect**
-  - Problem: `http://localhost:9090/` leitete zu `http://localhost/dashboard/` (Port verloren)
-  - Ursache: Traefik interner Redirect ohne Port-Erhaltung
-  - Lösung: nginx macht Redirect selbst mit `$http_host` (enthält Port)
+  - Problem: `http://localhost:9090/` redirected to `http://localhost/dashboard/` (port lost)
+  - Cause: Traefik internal redirect without port preservation
+  - Solution: nginx handles redirect with `$http_host` (includes port)
 
-- **Traefik Dashboard Burger-Menü Links**
-  - Problem: Alle Links zeigten auf `localhost:9090/...` statt `arch.local/...`
-  - Ursache: Globale `global-nav.js` mit relativen Pfaden
-  - Lösung: Separate `traefik-proxy/global-nav.js` mit absoluten URLs zu `http://arch.local/`
+- **Traefik Dashboard burger menu links**
+  - Problem: All links pointed to `localhost:9090/...` instead of `arch.local/...`
+  - Cause: Global `global-nav.js` with relative paths
+  - Solution: Separate `traefik-proxy/global-nav.js` with absolute URLs to `http://arch.local/`
 
-- **PlantUML GitHub Banner wieder sichtbar**
-  - Problem: "Fork me on GitHub" Banner wurde nicht mehr ausgeblendet
-  - Ursache: `sub_filter` String-Match funktioniert nicht mehr (HTML-Struktur geändert)
-  - Lösung: CSS-Injection (`plantuml-hide.css`) - robuster als String-Matching
+- **PlantUML GitHub banner visible again**
+  - Problem: "Fork me on GitHub" banner was not hidden anymore
+  - Cause: `sub_filter` string match no longer works (HTML structure changed)
+  - Solution: CSS injection (`plantuml-hide.css`) - more robust than string matching
 
 ### Technical
-- **Neue Dateien:**
-  - `traefik-proxy/global-nav.js` - Absolute URLs für Traefik Dashboard
-  - `plantuml-hide.css` - CSS zum Ausblenden von GitHub Banner
+- **New files:**
+  - `traefik-proxy/global-nav.js` - absolute URLs for Traefik Dashboard
+  - `plantuml-hide.css` - CSS to hide GitHub banner
 
-- **Geänderte Dateien:**
-  - `traefik-proxy/nginx.conf` - Root-Redirect mit Port-Erhaltung
-  - `traefik-proxy/Dockerfile` - Lokale global-nav.js verwenden
-  - `plantuml-proxy/nginx.conf` - sub_filter entfernt, CSS-Injection
-  - `plantuml-proxy/Dockerfile` - plantuml-hide.css hinzugefügt
+- **Changed files:**
+  - `traefik-proxy/nginx.conf` - root redirect with port preservation
+  - `traefik-proxy/Dockerfile` - use local global-nav.js
+  - `plantuml-proxy/nginx.conf` - sub_filter removed, CSS injection
+  - `plantuml-proxy/Dockerfile` - plantuml-hide.css added
 
-- **Erforderliche Rebuilds:**
+- **Required rebuilds:**
   - `docker-compose build --no-cache traefik-dashboard plantuml`
-
-### Documentation
-- `docs/20251206_traefik_plantuml_fixes.md`
 
 ---
 
 ## [1.4.0] - 2025-12-06
 
 ### Added
-- **Dashboard Footer mit Tab-System**
-  - Tab 1 "Info & Links": Projekt-Info, Repository, Dokumentation, Runbook
-  - Tab 2 "Kontakt & Profile": Social Cards (Website, LinkedIn, GitHub)
-  - Smooth Tab-Switching Animation
-  - Mobile-optimiertes Layout
+- **Dashboard Footer with Tab System**
+  - Tab 1 "Info & Links": Project info, repository, documentation, runbook
+  - Tab 2 "Contact & Profiles": Social cards (website, LinkedIn, GitHub)
+  - Smooth tab-switching animation
+  - Mobile-optimized layout
 
-- **Mermaid Werbebanner Ausblendung**
-  - Neue CSS-Datei: `mermaid-ad-hide.css`
-  - Blendet "Mermaid Chart" Promotional Banner dauerhaft aus
-  - CSS-Selektoren für verschiedene Banner-Varianten
+- **Mermaid ad banner hiding**
+  - New CSS file: `mermaid-ad-hide.css`
+  - Permanently hides "Mermaid Chart" promotional banner
+  - CSS selectors for various banner variants
 
 ### Changed
-- **Burger-Menü Vereinheitlichung**
-  - Dashboard: Menü aus Header entfernt, globales floating Menü aktiviert
-  - Kroki: nginx.conf korrigiert für statische Dateien
-  - MkDocs: CSS/JS auf floating Version aktualisiert
-  - Alle Services nutzen jetzt identisches Menü-Design
-
-- **Menü-Position konsistent**
-  - Position: Fixed, vertikal zentriert (top: 50%), rechter Rand
-  - Backdrop-Filter mit Blur-Effekt
-  - Einheitliche Animation und Hover-States
+- **Burger menu unification**
+  - Dashboard: Menu removed from header, global floating menu activated
+  - Kroki: nginx.conf corrected for static files
+  - MkDocs: CSS/JS updated to floating version
+  - All services now use identical menu design
 
 ### Fixed
-- **Traefik Dashboard Link korrigiert**
-  - Problem: Links zeigten auf Port 8080 statt 9090
-  - Gefixt in: `dashboard/dist/index.html`, `global-nav.js`
-  - Gefixt in: `repo/docs/javascripts/global-nav.js`
+- **Traefik Dashboard link corrected**
+  - Problem: Links pointed to port 8080 instead of 9090
+  - Fixed in: `dashboard/dist/index.html`, `global-nav.js`
 
-- **Kroki Navigation nicht sichtbar**
-  - Problem: nginx location `/` fing alle Requests ab
-  - Lösung: Explizite `alias` Direktiven für `/global-nav.*`
-
-### Technical
-- **Geänderte Dateien:**
-  - `dashboard/dist/index.html` - Footer Tabs, globales Menü
-  - `global-nav.js` - Port Fix
-  - `mermaid-ad-hide.css` - NEU
-  - `mermaid-live/Dockerfile` - CSS injection
-  - `kroki-frontend/nginx.conf` - Statische Dateien Routing
-  - `repo/docs/stylesheets/global-nav.css` - Floating Update
-  - `repo/docs/javascripts/global-nav.js` - Floating + Port Fix
-
-- **Erforderliche Rebuilds:**
-  - `docker-compose restart kroki`
-  - `docker-compose build --no-cache mermaid-live`
-  - `docker-compose build --no-cache docs`
-
-### Documentation
-- Neue Dokumentation: `docs/20251206_ui_consistency_todos.md`
+- **Kroki navigation not visible**
+  - Problem: nginx location `/` caught all requests
+  - Solution: Explicit `alias` directives for `/global-nav.*`
 
 ---
 
 ## [1.3.0] - 2025-11-30
 
 ### Added
-- **MkDocs Metadata-System**
-  - Automatische Projekt-Variablen aus `mkdocs.yml`
-  - YAML Front Matter für dokumenten-spezifische Metadaten
-  - File-Macros: `file_modified_date()` und `file_size()`
-  - Dokumentation: `setup/metadata-final.md` mit Copy-Paste Templates
+- **MkDocs Metadata System**
+  - Automatic project variables from `mkdocs.yml`
+  - YAML front matter for document-specific metadata
+  - File macros: `file_modified_date()` and `file_size()`
 
 ### Changed
-- **Traefik Dashboard Port:** 8080 → 9090 (Port-Konflikt mit MCP-Server behoben)
-- **mkdocs-macros Plugin:** Konfiguration optimiert (`module_name: macros`)
-- **Dokumentation bereinigt:** Veraltete Macro-Demos entfernt
+- **Traefik Dashboard Port:** 8080 → 9090 (port conflict with MCP server resolved)
+- **mkdocs-macros Plugin:** Configuration optimized (`module_name: macros`)
 
 ### Fixed
-- **Rekursionsfehler:** Template-Includes und page.meta-Macros entfernt
-- **Docker-Befehle Syntax:** `{% raw %}` Wrapper hinzugefügt für Code-Beispiele
-
-### Learned
-- mkdocs-macros: Zugriff auf `page.meta` in Macros verursacht Rekursion
-- Template-Includes (`{% include %}`) funktionieren nicht mit mkdocs-macros
-- Lösung: Direkte Variablen verwenden (`{{ project.name }}`, `{{ page.meta.feature }}`)
-- Git-Plugin funktioniert nicht im Docker ohne `.git` Verzeichnis
+- **Recursion error:** Template includes and page.meta macros removed
+- **Docker commands syntax:** `{% raw %}` wrapper added for code examples
 
 ---
 
@@ -205,22 +208,15 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ### Added
 - **Dashboard Health-Check System**
-  - Live Service-Status Monitoring
-  - Automatische Health-Checks alle 30 Sekunden
-  - Farbcodierte Status-Anzeige (Grün/Gelb/Rot)
-  - 6 Services überwacht: Dashboard, Docs, Mermaid, Excalidraw, PlantUML, Kroki
-  - Dokumentation: `setup/dashboard-health-check.md`
+  - Live service status monitoring
+  - Automatic health checks every 30 seconds
+  - Color-coded status display (green/yellow/red)
+  - 6 services monitored
 
 - **Dashboard Quick Wins - Phase 1**
-  - Service-Cards mit direkten Links
-  - Icon-Integration (Font Awesome)
-  - Responsive Grid-Layout (Desktop 3 Spalten, Tablet 2, Mobile 1)
-  - Beschreibungstexte für jeden Service
-  - Dokumentation: `setup/dashboard-quick-wins-phase1.md`
-
-### Changed
-- **Dashboard Layout:** Von Liste zu Card-Grid umgestaltet
-- **Dokumentations-Struktur:** Features in eigenem Verzeichnis
+  - Service cards with direct links
+  - Icon integration (Font Awesome)
+  - Responsive grid layout
 
 ---
 
@@ -228,102 +224,47 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ### Added
 - **Global Navigation Integration**
-  - Einheitliches Burger-Menü für alle Services
-  - Sticky Navigation (bleibt beim Scrollen sichtbar)
-  - Service-spezifische Hervorhebung
-  - Dark Mode Support
-  - Dokumentation: `setup/navigation.md`
+  - Unified burger menu for all services
+  - Sticky navigation
+  - Service-specific highlighting
+  - Dark mode support
 
 ### Fixed
-- **MkDocs Navigation 404-Fehler**
-  - Problem: Links von `/docs` führten zu 404
-  - Root Cause: Browser URL-Resolution mit relativen Pfaden
-  - Lösung: `/docs` → `/docs/index.html` in allen Burger-Menüs
-  - Betroffene Container: docs, dashboard, kroki
-  - Dokumentation: `setup/mkdocs-navigation-fix.md`
-
-### Learned
-- Browser URL-Resolution: `/docs` (Base=/), `/docs/index.html` (Base=/docs/)
-- HTML `<base>` Tag mit absoluten Pfaden ist fehleranfällig
-- Einfache Lösungen > Elegante aber komplexe Lösungen
+- **MkDocs Navigation 404 errors**
+  - Problem: Links from `/docs` led to 404
+  - Solution: `/docs` → `/docs/index.html` in all burger menus
 
 ---
 
 ## [1.0.0] - 2025-11-23
 
 ### Added
-- **Initiales Setup**
-  - Docker Compose Stack mit 13 Containern
-  - Traefik Reverse Proxy mit PathPrefix-Routing
-  - Nginx-basierte Service-Proxies für Navigation-Integration
+- **Initial Setup**
+  - Docker Compose stack with 13 containers
+  - Traefik reverse proxy with PathPrefix routing
+  - Nginx-based service proxies for navigation integration
 
 - **Services**
-  - **Dashboard:** Zentrale Übersichtsseite (Nginx)
-  - **MkDocs:** Dokumentations-System (Material Theme)
-  - **Mermaid Live Editor:** Custom Build mit Save/Load Features
-  - **Excalidraw:** Whiteboard-Tool
-  - **PlantUML:** UML-Diagramm Server + Nginx Proxy
-  - **Kroki:** Multi-Format Diagramm-Service (+ 4 Companions)
+  - Dashboard, MkDocs, Mermaid Live Editor, Excalidraw, PlantUML, Kroki
 
-- **Infrastruktur**
-  - Shared Docker Network: `empc4_net`
-  - Health-Checks für alle Services
-  - Environment-Konfiguration via `.env`
-  - Local Domain: `arch.local` (via hosts-Datei)
-
-- **Dokumentation**
-  - Docker-Befehle Referenz
-  - Dependencies Übersicht
-  - MkDocs Anleitung
-  - Service-spezifische Dokumentationen
+- **Infrastructure**
+  - Shared Docker network: `empc4_net`
+  - Health checks for all services
+  - Environment configuration via `.env`
+  - Local domain: `arch.local`
 
 ---
 
-## [0.1.0] - 2025-11-XX
+## Versioning
 
-### Initial Development
-- Projekt-Konzeption
-- Technology Stack Evaluation
-- Docker-Container Prototyping
-- Repository-Struktur aufgebaut
-
----
-
-## Kategorien
-
-### Added
-Neue Features, die hinzugefügt wurden.
-
-### Changed
-Änderungen an bestehenden Features.
-
-### Deprecated
-Features die bald entfernt werden.
-
-### Removed
-Entfernte Features.
-
-### Fixed
-Bug-Fixes.
-
-### Security
-Sicherheits-relevante Änderungen.
-
-### Learned
-Erkenntnisse und Lessons Learned während der Entwicklung.
+This project follows [Semantic Versioning](https://semver.org/):
+- **MAJOR** (1.x.x): Breaking changes, major architecture changes
+- **MINOR** (x.1.x): New features, backwards-compatible
+- **PATCH** (x.x.1): Bug fixes, backwards-compatible
 
 ---
 
-## Versionierung
-
-Das Projekt folgt [Semantic Versioning](https://semver.org/lang/de/):
-- **MAJOR** (1.x.x): Breaking Changes, große Architektur-Änderungen
-- **MINOR** (x.1.x): Neue Features, backwards-compatible
-- **PATCH** (x.x.1): Bug-Fixes, backwards-compatible
-
----
-
-**Projekt:** EKMP-C4 Architektur-Visualisierungs Stack  
-**Repository:** https://github.com/JoZapf/EKMP-C4-arch-containerized-visualization-environment  
+**Project:** EMPC4 Architecture Visualization Stack  
+**Repository:** https://github.com/JoZapf/EMPC4-containerized-visualization-environment  
 **Maintainer:** Jo Zapf  
-**Lizenz:** MIT
+**License:** MIT
