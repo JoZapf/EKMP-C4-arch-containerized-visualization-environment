@@ -4,6 +4,9 @@ PlantUML Real-Time Collaboration Server
 Synchronizes PlantUML diagram text between multiple clients via WebSocket
 """
 
+import eventlet
+eventlet.monkey_patch()  # Muss VOR allen anderen Imports stehen - patcht stdlib fuer async WebSocket
+
 from flask import Flask, request
 from flask_socketio import SocketIO, emit, join_room, leave_room
 import logging
