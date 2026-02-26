@@ -11,8 +11,12 @@ COPY global-nav.js /usr/share/nginx/html/global-nav.js
 # Copy PlantUML-specific CSS to hide GitHub banner
 COPY plantuml-hide.css /usr/share/nginx/html/plantuml-hide.css
 
-# Copy collaboration client
+# Copy collaboration client (legacy, textarea-based)
 COPY plantuml-proxy/collab-client.js /usr/share/nginx/html/collab-client.js
+
+# Copy collaboration control (opt-in for Monaco sync.js)
+# MUST be loaded in HEAD after socket.io but BEFORE sync.js
+COPY plantuml-proxy/collab-control.js /usr/share/nginx/html/collab-control.js
 
 # Socket.IO client library - in IIFE einwickeln damit Monaco's AMD-Loader nicht die define()-Funktion
 # kapert und window.io nicht gesetzt wird (UMD erkennt define.amd und nutzt AMD statt global)
