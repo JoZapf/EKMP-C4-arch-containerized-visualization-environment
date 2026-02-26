@@ -36,9 +36,21 @@
     // =========================================================================
     // BroadcastChannel Interception
     // sync.js uses BroadcastChannel for same-origin tab sync - must block this too!
-    // IMPORTANT: Block receiving (onmessage), NOT sending (postMessage)!
-    // PlantUML uses BC internally for editor<->preview communication.
+    // 
+    // PROBLEM: PlantUML also uses BC internally (possibly with Workers).
+    // SOLUTION: Use a unique Tab-ID to distinguish own messages from other tabs.
+    // - Tag outgoing messages with our Tab-ID
+    // - Allow incoming messages from OUR Tab-ID (internal communication)
+    // - Block incoming messages from OTHER Tab-IDs when Sync is OFF
     // =========================================================================
+    
+    // Use sessionStorage to share Tab-ID across iframes in the same tab
+    let TAB_ID = sessionStorage.getItem('empc4_tab_id');
+    if (!TAB_ID) {
+        TAB_ID = 'empc4_' + Math.random().toString(36).substring(2, 10);
+        sessionStorage.setItem('empc4_tab_id', TAB_ID);
+    }
+    console.log('[Collab Control] Tab ID:', TAB_ID);
     
     const originalBroadcastChannel = window.BroadcastChannel;
     
@@ -47,22 +59,74 @@
             console.log('[Collab Control] BroadcastChannel created:', name);
             
             const channel = new originalBroadcastChannel(name);
+            const originalPostMessage = channel.postMessage.bind(channel);
             
-            // Intercept onmessage setter - block RECEIVING, not sending
-            // This allows internal PlantUML communication while blocking cross-tab sync
+            // Intercept postMessage - tag with our Tab-ID
+            channel.postMessage = function(message) {
+                // Wrap message with Tab-ID metadata
+                const wrappedMessage = {
+                    _empc4_tabId: TAB_ID,
+                    _empc4_payload: message
+                };
+                return originalPostMessage(wrappedMessage);
+            };
+            
+            // Helper function to process incoming messages
+            function processIncomingMessage(event, callback) {
+                const data = event.data;
+                
+                // Check if it's a wrapped message from our system
+                if (data && data._empc4_tabId) {
+                    const fromTabId = data._empc4_tabId;
+                    const payload = data._empc4_payload;
+                    
+                    // Always allow messages from OUR OWN tab (internal communication)
+                    if (fromTabId === TAB_ID) {
+                        console.log('[Collab Control] BC allowed (own tab):', name);
+                        // Reconstruct event with original payload
+                        const fakeEvent = Object.create(event);
+                        Object.defineProperty(fakeEvent, 'data', { value: payload });
+                        callback(fakeEvent);
+                        return;
+                    }
+                    
+                    // Message from OTHER tab - check sync status
+                    if (!syncEnabled) {
+                        console.log('[Collab Control] BC blocked (other tab, Sync OFF):', name);
+                        return; // Block!
+                    }
+                    
+                    console.log('[Collab Control] BC allowed (other tab, Sync ON):', name);
+                    const fakeEvent = Object.create(event);
+                    Object.defineProperty(fakeEvent, 'data', { value: payload });
+                    callback(fakeEvent);
+                    return;
+                }
+                
+                // Not a wrapped message - pass through (internal/legacy)
+                callback(event);
+            }
+            
+            // Intercept addEventListener for 'message' events
+            const originalAddEventListener = channel.addEventListener.bind(channel);
+            channel.addEventListener = function(type, listener, options) {
+                if (type === 'message') {
+                    return originalAddEventListener(type, function(event) {
+                        processIncomingMessage(event, listener);
+                    }, options);
+                }
+                return originalAddEventListener(type, listener, options);
+            };
+            
+            // Intercept onmessage setter
             let userHandler = null;
-            
             Object.defineProperty(channel, 'onmessage', {
                 set: function(handler) {
                     userHandler = handler;
-                    channel.addEventListener('message', function(event) {
-                        if (!syncEnabled) {
-                            console.log('[Collab Control] BroadcastChannel receive blocked (Sync OFF):', name);
-                            return; // Block incoming message
-                        }
-                        if (userHandler) {
-                            userHandler(event);
-                        }
+                    originalAddEventListener('message', function(event) {
+                        processIncomingMessage(event, function(processedEvent) {
+                            if (userHandler) userHandler(processedEvent);
+                        });
                     });
                 },
                 get: function() {
@@ -82,7 +146,7 @@
             window.BroadcastChannel[key] = originalBroadcastChannel[key];
         });
         
-        console.log('[Collab Control] BroadcastChannel interceptor installed (receive-side)');
+        console.log('[Collab Control] BroadcastChannel interceptor installed (Tab-ID based)');
     }
 
     // =========================================================================
