@@ -36,6 +36,8 @@
     // =========================================================================
     // BroadcastChannel Interception
     // sync.js uses BroadcastChannel for same-origin tab sync - must block this too!
+    // IMPORTANT: Block receiving (onmessage), NOT sending (postMessage)!
+    // PlantUML uses BC internally for editor<->preview communication.
     // =========================================================================
     
     const originalBroadcastChannel = window.BroadcastChannel;
@@ -45,19 +47,30 @@
             console.log('[Collab Control] BroadcastChannel created:', name);
             
             const channel = new originalBroadcastChannel(name);
-            const originalPostMessage = channel.postMessage.bind(channel);
             
-            // Intercept postMessage
-            channel.postMessage = function(message) {
-                if (!syncEnabled) {
-                    console.log('[Collab Control] BroadcastChannel blocked (Sync OFF):', name);
-                    return; // Block the message
+            // Intercept onmessage setter - block RECEIVING, not sending
+            // This allows internal PlantUML communication while blocking cross-tab sync
+            let userHandler = null;
+            
+            Object.defineProperty(channel, 'onmessage', {
+                set: function(handler) {
+                    userHandler = handler;
+                    channel.addEventListener('message', function(event) {
+                        if (!syncEnabled) {
+                            console.log('[Collab Control] BroadcastChannel receive blocked (Sync OFF):', name);
+                            return; // Block incoming message
+                        }
+                        if (userHandler) {
+                            userHandler(event);
+                        }
+                    });
+                },
+                get: function() {
+                    return userHandler;
                 }
-                console.log('[Collab Control] BroadcastChannel allowed (Sync ON):', name);
-                return originalPostMessage(message);
-            };
+            });
             
-            // Store reference for later enabling
+            // Store reference
             if (!window._empc4_channels) window._empc4_channels = [];
             window._empc4_channels.push(channel);
             
@@ -69,7 +82,7 @@
             window.BroadcastChannel[key] = originalBroadcastChannel[key];
         });
         
-        console.log('[Collab Control] BroadcastChannel interceptor installed');
+        console.log('[Collab Control] BroadcastChannel interceptor installed (receive-side)');
     }
 
     // =========================================================================
