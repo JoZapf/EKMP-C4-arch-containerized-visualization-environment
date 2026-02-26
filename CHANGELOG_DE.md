@@ -40,11 +40,18 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 - **Behoben:** `plantuml-sync/app.py`
   - `on_disconnect()` akzeptiert jetzt `*args` (Flask-SocketIO übergibt Disconnect-Grund)
 
-### Kritische Erkenntnis
+### Kritische Erkenntnisse
 - sync.js nutzt **zwei** Sync-Mechanismen:
   1. Socket.IO für Cross-Browser/Cross-Device Sync
   2. BroadcastChannel für Same-Origin Tab-Sync (schneller, kein Server)
 - Beide müssen intercepted werden für vollständige Opt-in Kontrolle
+- PlantUML nutzt BroadcastChannel auch intern (Editor ↔ Vorschau Kommunikation)
+- Einfaches Blockieren zerstört interne Funktionalität
+- **Lösung:** Tab-ID basiertes Filtering via sessionStorage
+  - Jeder Tab bekommt eindeutige ID in sessionStorage
+  - Ausgehende Messages werden mit Tab-ID getaggt
+  - Eingehende Messages von eigener Tab-ID immer erlaubt
+  - Eingehende Messages von fremder Tab-ID blockiert wenn Sync OFF
 
 ---
 

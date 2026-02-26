@@ -1,5 +1,7 @@
 docs/**
 !docs/EKMP-C4_web.jpg
+!docs/docu/
+!docs/docu/**
 .env
 repo/docs/.bkp.README.md
 _project-tree-structure.txt
