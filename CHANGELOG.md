@@ -15,6 +15,37 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.5.1] - 2025-02-26
+
+### Added
+- **PlantUML Collaboration Opt-in Consent**
+  - Sync is now OFF by default (privacy first)
+  - Toggle button to enable/disable collaboration
+  - Three status states: Unavailable (red), Off (yellow), On (green)
+  - No sync without explicit user consent
+
+### Technical
+- **New File:** `plantuml-proxy/collab-control.js`
+  - Intercepts `window.io()` to block automatic Socket.IO join
+  - Intercepts `window.BroadcastChannel` to block same-origin tab sync
+  - Must load in HEAD after socket.io.min.js but before sync.js
+  - Exposes `EMPC4_toggleSync()` for UI button
+
+- **Modified:** `plantuml-proxy/nginx.conf`
+  - Moved collab-control.js injection from BODY to HEAD
+  - Critical: Script load order determines interception success
+
+- **Fixed:** `plantuml-sync/app.py`
+  - `on_disconnect()` now accepts `*args` (Flask-SocketIO passes disconnect reason)
+
+### Critical Discovery
+- sync.js uses **two** sync mechanisms:
+  1. Socket.IO for cross-browser/cross-device sync
+  2. BroadcastChannel for same-origin tab sync (faster, no server)
+- Both must be intercepted for complete opt-in control
+
+---
+
 ## [1.5.0] - 2025-02-25
 
 ### Added

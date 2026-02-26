@@ -5,7 +5,7 @@
 [![Docker](https://img.shields.io/badge/Docker-20.10%2B-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
 [![Docker Compose](https://img.shields.io/badge/Docker%20Compose-2.0%2B-2496ED?logo=docker&logoColor=white)](https://docs.docker.com/compose/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/Version-1.5.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/Version-1.5.1-blue.svg)](CHANGELOG.md)
 [![PlantUML](https://img.shields.io/badge/PlantUML-Collab-yellowgreen.svg)](https://plantuml.com/)
 [![Mermaid](https://img.shields.io/badge/Mermaid-Live-ff3670.svg)](https://mermaid.js.org/)
 [![Learning Project](https://img.shields.io/badge/🎓-Lernprojekt-orange.svg)](#über-das-projekt)
@@ -31,8 +31,11 @@
 - 👥 **Multi-Gerät-Bearbeitung** – Windows, Linux, Mac
 - 🔒 **Self-hosted** – keine Cloud-Abhängigkeit
 - ⚡ **Sofortige Updates** – Änderungen live sehen
+- ✅ **Opt-in by Design** – kein Sync ohne explizite Zustimmung
 
 Umgesetzt mit Flask-SocketIO + eventlet, integriert in den bestehenden PlantUML Monaco Editor.
+
+**Privacy first:** Sync ist standardmäßig AUS. Klick auf den Toggle-Button aktiviert die Kollaboration.
 
 </td>
 <td width="50%">
