@@ -143,7 +143,7 @@ class PlantUMLSyncNamespace(Namespace):
         # auto-join als Fallback (Room wird spaeter durch diagram_update korrekt gesetzt)
         emit('connected', {'sid': request.sid})
 
-    def on_disconnect(self):
+    def on_disconnect(self, *args):
         logger.info(f"[/plantuml-sync] Client disconnected: {request.sid}")
         _on_disconnect()
 
