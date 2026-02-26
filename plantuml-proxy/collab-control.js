@@ -34,6 +34,45 @@
     let roomId = null;
 
     // =========================================================================
+    // BroadcastChannel Interception
+    // sync.js uses BroadcastChannel for same-origin tab sync - must block this too!
+    // =========================================================================
+    
+    const originalBroadcastChannel = window.BroadcastChannel;
+    
+    if (originalBroadcastChannel) {
+        window.BroadcastChannel = function(name) {
+            console.log('[Collab Control] BroadcastChannel created:', name);
+            
+            const channel = new originalBroadcastChannel(name);
+            const originalPostMessage = channel.postMessage.bind(channel);
+            
+            // Intercept postMessage
+            channel.postMessage = function(message) {
+                if (!syncEnabled) {
+                    console.log('[Collab Control] BroadcastChannel blocked (Sync OFF):', name);
+                    return; // Block the message
+                }
+                console.log('[Collab Control] BroadcastChannel allowed (Sync ON):', name);
+                return originalPostMessage(message);
+            };
+            
+            // Store reference for later enabling
+            if (!window._empc4_channels) window._empc4_channels = [];
+            window._empc4_channels.push(channel);
+            
+            return channel;
+        };
+        
+        // Copy static properties
+        Object.keys(originalBroadcastChannel).forEach(function(key) {
+            window.BroadcastChannel[key] = originalBroadcastChannel[key];
+        });
+        
+        console.log('[Collab Control] BroadcastChannel interceptor installed');
+    }
+
+    // =========================================================================
     // Socket.IO Interception
     // Patch io() to intercept the socket created by sync.js
     // =========================================================================
