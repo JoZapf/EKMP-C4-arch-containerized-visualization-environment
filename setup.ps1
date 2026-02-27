@@ -1,286 +1,349 @@
-# EKMP-C4 ARCHITEKTUR VISUALISIERUNGS STACK - Setup Script (PowerShell)
-# Dieses Script bereitet die Umgebung für den ersten Start vor (Windows)
+# ==============================================================================
+# EKMP-C4 Architecture Visualization Environment - Setup Script (PowerShell)
+# ==============================================================================
+# Repository : https://github.com/JoZapf/EKMP-C4-arch-containerized-visualization-environment
+# License    : MIT
+# Author     : Jo Zapf
+# Since      : November 2025
+# Updated    : February 2026
+# ==============================================================================
+# This script prepares the environment for first-time deployment on Windows.
+# It checks prerequisites, creates required directories, validates the
+# configuration, and starts all Docker services.
+# ==============================================================================
 
-# Setze Error Action
+# Halt on errors
 $ErrorActionPreference = "Stop"
 
-# Funktionen für farbigen Output
+# --- Helper Functions --------------------------------------------------------
+
 function Write-Info {
     param([string]$Message)
     Write-Host "[INFO] $Message" -ForegroundColor Blue
 }
 
-function Write-Success {
+function Write-Ok {
     param([string]$Message)
-    Write-Host "[SUCCESS] $Message" -ForegroundColor Green
+    Write-Host "[  OK] $Message" -ForegroundColor Green
 }
 
-function Write-Warning {
+function Write-Warn {
     param([string]$Message)
-    Write-Host "[WARNING] $Message" -ForegroundColor Yellow
+    Write-Host "[WARN] $Message" -ForegroundColor Yellow
 }
 
-function Write-Error-Custom {
+function Write-Err {
     param([string]$Message)
-    Write-Host "[ERROR] $Message" -ForegroundColor Red
+    Write-Host "[ ERR] $Message" -ForegroundColor Red
 }
 
-# Header
-Write-Host "======================================================================"
-Write-Host "  EMPC4 VIS Stack - Setup Script (Windows)"
-Write-Host "======================================================================"
+# Detect docker compose command (V2 preferred)
+function Get-ComposeCmd {
+    try {
+        $null = docker compose version 2>$null
+        if ($LASTEXITCODE -eq 0) { return "docker compose" }
+    } catch {}
+    try {
+        $null = docker-compose --version 2>$null
+        if ($LASTEXITCODE -eq 0) { return "docker-compose" }
+    } catch {}
+    return $null
+}
+
+# Read a value from .env file (simple key=value parser)
+function Get-EnvValue {
+    param([string]$Key, [string]$Default)
+    if (Test-Path ".env") {
+        $match = Select-String -Path ".env" -Pattern "^${Key}=(.+)$" | Select-Object -First 1
+        if ($match) {
+            return $match.Matches[0].Groups[1].Value.Trim()
+        }
+    }
+    return $Default
+}
+
+# --- Main Script -------------------------------------------------------------
+
+Write-Host ""
+Write-Host "======================================================================" -ForegroundColor Cyan
+Write-Host "  EKMP-C4 Architecture Visualization Environment - Setup" -ForegroundColor Cyan
+Write-Host "  Platform: Windows (PowerShell)" -ForegroundColor Cyan
+Write-Host "======================================================================" -ForegroundColor Cyan
 Write-Host ""
 
-# 1. Prüfe Voraussetzungen
-Write-Info "Prüfe Voraussetzungen..."
+# ---- 1. Prerequisites -------------------------------------------------------
 
-# Docker prüfen
+Write-Info "Checking prerequisites..."
+
+# Docker
 try {
-    $dockerVersion = docker --version
-    Write-Success "Docker gefunden: $dockerVersion"
+    $dockerVersion = (docker --version 2>$null)
+    if ($LASTEXITCODE -ne 0) { throw "not found" }
+    Write-Ok "Docker found: $dockerVersion"
 } catch {
-    Write-Error-Custom "Docker ist nicht installiert!"
-    Write-Host "Installiere Docker Desktop: https://docs.docker.com/desktop/install/windows-install/"
+    Write-Err "Docker is not installed!"
+    Write-Host "  Install Docker Desktop: https://docs.docker.com/desktop/install/windows-install/"
     exit 1
 }
 
-# Docker Compose prüfen
+# Docker Compose
+$COMPOSE = Get-ComposeCmd
+if (-not $COMPOSE) {
+    Write-Err "Docker Compose is not installed!"
+    Write-Host "  Docker Desktop ships with 'docker compose' (V2) by default."
+    exit 1
+}
+$composeVer = if ($COMPOSE -eq "docker compose") {
+    (docker compose version 2>$null)
+} else {
+    (docker-compose --version 2>$null)
+}
+Write-Ok "Docker Compose found: $composeVer"
+
+# Git (optional, but useful)
 try {
-    $composeVersion = docker-compose --version
-    Write-Success "Docker Compose gefunden: $composeVersion"
+    $gitVersion = (git --version 2>$null)
+    if ($LASTEXITCODE -eq 0) {
+        Write-Ok "Git found: $gitVersion"
+    }
 } catch {
-    try {
-        $composeVersion = docker compose version
-        Write-Success "Docker Compose gefunden: $composeVersion"
-    } catch {
-        Write-Error-Custom "Docker Compose ist nicht installiert!"
+    Write-Warn "Git not found - optional but recommended for version control"
+}
+
+Write-Host ""
+
+# ---- 2. Environment Configuration -------------------------------------------
+
+Write-Info "Checking .env configuration..."
+
+if (-not (Test-Path ".env")) {
+    if (Test-Path ".env.example") {
+        Write-Warn ".env not found - creating from .env.example"
+        Copy-Item ".env.example" ".env"
+        Write-Ok ".env created"
+        Write-Host ""
+        Write-Warn "IMPORTANT: Review and adjust .env for your environment!"
+        Write-Host "  At minimum, set ARCH_BASE_DOMAIN to your hostname." -ForegroundColor Yellow
+        Write-Host ""
+    } else {
+        Write-Err ".env.example not found - cannot create .env"
+        Write-Host "  Make sure you are running this script from the project root."
         exit 1
     }
-}
-
-# 2. Erstelle .env wenn nicht vorhanden
-Write-Info "Prüfe .env Datei..."
-if (-not (Test-Path ".env")) {
-    Write-Warning ".env nicht gefunden - erstelle aus .env.example"
-    Copy-Item ".env.example" ".env"
-    Write-Success ".env erstellt"
-    Write-Info "WICHTIG: Passe .env an deine Umgebung an!"
 } else {
-    Write-Success ".env bereits vorhanden"
+    Write-Ok ".env already exists"
 }
 
-# 3. Prüfe Verzeichnisstruktur
-Write-Info "Prüfe Verzeichnisstruktur..."
+# Read configuration values
+$DOMAIN = Get-EnvValue -Key "ARCH_BASE_DOMAIN" -Default "arch.local"
+$HTTP_PORT = Get-EnvValue -Key "HTTP_PORT" -Default "80"
+$TRAEFIK_PORT = Get-EnvValue -Key "TRAEFIK_DASHBOARD_PORT" -Default "9090"
 
-$dirs = @(
+Write-Info "Configuration: ARCH_BASE_DOMAIN=$DOMAIN  HTTP_PORT=$HTTP_PORT  TRAEFIK_DASHBOARD_PORT=$TRAEFIK_PORT"
+
+# ---- 3. Directory Structure --------------------------------------------------
+
+Write-Info "Checking directory structure..."
+
+$requiredDirs = @(
     "repo\docs",
     "repo\c4",
     "repo\assets\excalidraw",
     "dashboard\dist",
-    "data\letsencrypt"
+    "scripts"
 )
 
-foreach ($dir in $dirs) {
+foreach ($dir in $requiredDirs) {
     if (-not (Test-Path $dir)) {
-        Write-Warning "Verzeichnis $dir nicht gefunden - erstelle..."
+        Write-Warn "Directory '$dir' missing - creating..."
         New-Item -ItemType Directory -Path $dir -Force | Out-Null
-        Write-Success "$dir erstellt"
+        Write-Ok "Created $dir"
     }
 }
 
-Write-Success "Verzeichnisstruktur vollständig"
+Write-Ok "Directory structure complete"
+Write-Host ""
 
-# 4. Prüfe hosts-Datei
-Write-Info "Prüfe hosts-Datei für arch.local..."
+# ---- 4. Hosts File -----------------------------------------------------------
+
+Write-Info "Checking hosts file for '$DOMAIN'..."
 
 $hostsPath = "C:\Windows\System32\drivers\etc\hosts"
 $hostsContent = Get-Content $hostsPath -ErrorAction SilentlyContinue
 
-if ($hostsContent -match "arch.local") {
-    Write-Success "arch.local in hosts-Datei gefunden"
+if ($hostsContent -match [regex]::Escape($DOMAIN)) {
+    Write-Ok "'$DOMAIN' found in hosts file"
 } else {
-    Write-Warning "arch.local nicht in hosts-Datei gefunden"
+    Write-Warn "'$DOMAIN' not found in hosts file"
     Write-Host ""
-    Write-Host "Füge folgenden Eintrag zur hosts-Datei hinzu:"
+    Write-Host "  Add this line to $hostsPath :"
     Write-Host ""
-    Write-Host "    127.0.0.1    arch.local"
-    Write-Host ""
-    Write-Host "Datei: $hostsPath"
+    Write-Host "    127.0.0.1    $DOMAIN" -ForegroundColor Yellow
     Write-Host ""
 
-    $response = Read-Host "Soll ich das jetzt machen? (erfordert Admin-Rechte) (y/N)"
+    $response = Read-Host "  Add it now? (requires admin privileges) [y/N]"
     if ($response -eq "y" -or $response -eq "Y") {
-        try {
-            # Prüfe Admin-Rechte
-            $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+        $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole(
+            [Security.Principal.WindowsBuiltInRole]::Administrator)
 
-            if ($isAdmin) {
-                Add-Content -Path $hostsPath -Value "`n127.0.0.1    arch.local"
-                Write-Success "arch.local zu hosts-Datei hinzugefügt"
-            } else {
-                Write-Error-Custom "Keine Admin-Rechte! Starte PowerShell als Administrator."
-                Write-Host ""
-                Write-Host "Manuell hinzufügen:"
-                Write-Host "1. Öffne PowerShell als Administrator"
-                Write-Host "2. Führe aus: Add-Content -Path '$hostsPath' -Value '`n127.0.0.1    arch.local'"
-                Write-Host ""
-            }
-        } catch {
-            Write-Error-Custom "Konnte arch.local nicht zu hosts-Datei hinzufügen: $_"
+        if ($isAdmin) {
+            Add-Content -Path $hostsPath -Value "`n127.0.0.1    $DOMAIN"
+            Write-Ok "'$DOMAIN' added to hosts file"
+        } else {
+            Write-Err "No admin privileges! Run PowerShell as Administrator."
+            Write-Host "  Manual command:"
+            Write-Host "    Add-Content -Path '$hostsPath' -Value '``n127.0.0.1    $DOMAIN'"
         }
     } else {
-        Write-Warning "Übersprungen - bitte manuell hinzufügen!"
+        Write-Warn "Skipped - please add the entry manually"
     }
 }
 
-# 5. Port-Check (falls verfügbar)
-Write-Info "Prüfe Port-Verfügbarkeit..."
+Write-Host ""
 
-# Prüfe ob Python verfügbar ist
+# ---- 5. Port Availability Check ----------------------------------------------
+
+Write-Info "Checking port availability..."
+
 $pythonCmd = $null
-if (Get-Command python -ErrorAction SilentlyContinue) {
-    $pythonCmd = "python"
-} elseif (Get-Command python3 -ErrorAction SilentlyContinue) {
-    $pythonCmd = "python3"
-}
+if (Get-Command python -ErrorAction SilentlyContinue) { $pythonCmd = "python" }
+elseif (Get-Command python3 -ErrorAction SilentlyContinue) { $pythonCmd = "python3" }
 
-if ($pythonCmd) {
-    # Prüfe ob psutil verfügbar ist
-    $psutilCheck = & $pythonCmd -c "import psutil" 2>$null
-    
+if ($pythonCmd -and (Test-Path "scripts/empc4_port_check.py")) {
+    $psutilOk = & $pythonCmd -c "import psutil" 2>$null
     if ($LASTEXITCODE -eq 0) {
-        Write-Info "Führe Port-Check aus..."
-        
-        # Führe Port-Check Script aus
+        Write-Info "Running port check..."
         & $pythonCmd scripts/empc4_port_check.py --suggest-fixes
-        
-        if ($LASTEXITCODE -eq 0) {
-            Write-Success "Alle Ports verfügbar"
-        } else {
-            Write-Error-Custom "Port-Konflikte gefunden!"
+
+        if ($LASTEXITCODE -ne 0) {
+            Write-Err "Port conflicts detected!"
             Write-Host ""
-            Write-Warning "Löse die Port-Konflikte bevor du die Container startest."
-            Write-Host "Tipps:"
-            Write-Host "  1. Ändere Ports in .env (z.B. HTTP_PORT=8080)"
-            Write-Host "  2. Stoppe belegende Services/Container"
+            Write-Host "  Options:" -ForegroundColor Yellow
+            Write-Host "    1. Change ports in .env (e.g. HTTP_PORT=8080)"
+            Write-Host "    2. Stop conflicting services/containers"
             Write-Host ""
-            $response = Read-Host "Trotzdem fortfahren? (y/N)"
+            $response = Read-Host "  Continue anyway? [y/N]"
             if ($response -ne "y" -and $response -ne "Y") {
-                Write-Error-Custom "Setup abgebrochen"
+                Write-Err "Setup aborted"
                 exit 1
             }
-            Write-Warning "Fahre fort trotz Port-Konflikten..."
+            Write-Warn "Continuing despite port conflicts..."
+        } else {
+            Write-Ok "All required ports available"
         }
     } else {
-        Write-Warning "psutil nicht installiert - Port-Check übersprungen"
-        Write-Info "Installiere mit: pip install psutil"
+        Write-Warn "psutil not installed - port check skipped"
+        Write-Host "  Install with: pip install psutil"
     }
 } else {
-    Write-Warning "Python nicht gefunden - Port-Check übersprungen"
+    Write-Warn "Python or port check script not found - port check skipped"
 }
 
 Write-Host ""
 
-# 6. Prüfe ob Container bereits laufen
-Write-Info "Prüfe laufende Container..."
+# ---- 6. Running Container Check ---------------------------------------------
 
-$runningContainers = docker-compose ps -q 2>$null
+Write-Info "Checking for running containers..."
+
+$runningContainers = Invoke-Expression "$COMPOSE ps -q" 2>$null
 if ($runningContainers) {
-    Write-Warning "Container laufen bereits!"
-    $response = Read-Host "Soll ich die Container neu starten? (y/N)"
+    Write-Warn "Containers are already running!"
+    $response = Read-Host "  Restart containers? [y/N]"
     if ($response -eq "y" -or $response -eq "Y") {
-        Write-Info "Stoppe Container..."
-        docker-compose down
-        Write-Success "Container gestoppt"
+        Write-Info "Stopping containers..."
+        Invoke-Expression "$COMPOSE down"
+        Write-Ok "Containers stopped"
     }
 }
 
-# 7. Pull Images
-Write-Info "Lade Docker Images..."
-try {
-    docker-compose pull
-} catch {
-    docker compose pull
-}
-Write-Success "Images geladen"
+# ---- 7. Pull & Build --------------------------------------------------------
 
-# 8. Starte Services
-Write-Info "Starte Services..."
-Write-Host ""
-try {
-    docker-compose up -d
-} catch {
-    docker compose up -d
-}
+Write-Info "Pulling base images..."
+Invoke-Expression "$COMPOSE pull --ignore-buildable"
+Write-Ok "Base images pulled"
+
+Write-Info "Building custom images..."
+Invoke-Expression "$COMPOSE build"
+Write-Ok "Custom images built"
+
+# ---- 8. Start Services ------------------------------------------------------
 
 Write-Host ""
-Write-Success "Services gestartet!"
-
-# 9. Warte auf Services
-Write-Info "Warte auf Service-Initialisierung..."
-Start-Sleep -Seconds 10
-
-# 10. Prüfe Service-Status
-Write-Info "Prüfe Service-Status..."
-Write-Host ""
-
-try {
-    docker-compose ps
-} catch {
-    docker compose ps
-}
+Write-Info "Starting services..."
+Invoke-Expression "$COMPOSE up -d"
 
 Write-Host ""
+Write-Ok "All services started!"
 
-# 11. Teste Erreichbarkeit
-Write-Info "Teste Service-Erreichbarkeit..."
+# ---- 9. Wait for Initialization ----------------------------------------------
+
+Write-Info "Waiting for services to initialize (15s)..."
+Start-Sleep -Seconds 15
+
+# ---- 10. Service Status ------------------------------------------------------
+
+Write-Info "Service status:"
+Write-Host ""
+Invoke-Expression "$COMPOSE ps"
+Write-Host ""
+
+# ---- 11. Connectivity Tests --------------------------------------------------
+
+Write-Info "Testing service connectivity..."
 
 $services = @(
-    @{Url="http://arch.local"; Name="Dashboard"},
-    @{Url="http://arch.local/docs"; Name="Dokumentation"},
-    @{Url="http://arch.local/plantuml"; Name="PlantUML"},
-    @{Url="http://arch.local/whiteboard"; Name="Excalidraw"},
-    @{Url="http://localhost:8080"; Name="Traefik Dashboard"}
+    @{Name="Dashboard";          Url="http://${DOMAIN}"},
+    @{Name="Documentation";      Url="http://${DOMAIN}/docs"},
+    @{Name="PlantUML Editor";    Url="http://${DOMAIN}/plantuml"},
+    @{Name="Excalidraw";         Url="http://${DOMAIN}/whiteboard"},
+    @{Name="Mermaid Live";       Url="http://${DOMAIN}/mermaid"},
+    @{Name="Kroki";              Url="http://${DOMAIN}/kroki"},
+    @{Name="Traefik Dashboard";  Url="http://localhost:${TRAEFIK_PORT}"}
 )
 
-foreach ($service in $services) {
+foreach ($svc in $services) {
     try {
-        $response = Invoke-WebRequest -Uri $service.Url -Method Head -TimeoutSec 5 -UseBasicParsing -ErrorAction SilentlyContinue
-        if ($response.StatusCode -in @(200, 301, 302)) {
-            Write-Success "$($service.Name) erreichbar: $($service.Url)"
+        $resp = Invoke-WebRequest -Uri $svc.Url -Method Head -TimeoutSec 5 -UseBasicParsing -ErrorAction SilentlyContinue
+        if ($resp.StatusCode -in @(200, 301, 302)) {
+            Write-Ok "$($svc.Name) reachable: $($svc.Url)"
         } else {
-            Write-Warning "$($service.Name) nicht erreichbar: $($service.Url) (HTTP $($response.StatusCode))"
+            Write-Warn "$($svc.Name) returned HTTP $($resp.StatusCode): $($svc.Url)"
         }
     } catch {
-        Write-Warning "$($service.Name) nicht erreichbar: $($service.Url) (kann noch initialisieren)"
+        Write-Warn "$($svc.Name) not reachable: $($svc.Url) (may still be initializing)"
     }
 }
 
-# 12. Zusammenfassung
+# ---- 12. Summary -------------------------------------------------------------
+
 Write-Host ""
-Write-Host "======================================================================"
-Write-Host "  Setup abgeschlossen!"
-Write-Host "======================================================================"
+Write-Host "======================================================================" -ForegroundColor Cyan
+Write-Host "  Setup Complete!" -ForegroundColor Green
+Write-Host "======================================================================" -ForegroundColor Cyan
 Write-Host ""
-Write-Host "Zugriff auf Services:"
+Write-Host "  Services:" -ForegroundColor Cyan
 Write-Host ""
-Write-Host "  🏠 Dashboard:       http://arch.local"
-Write-Host "  📚 Dokumentation:   http://arch.local/docs"
-Write-Host "  🎨 PlantUML:        http://arch.local/plantuml"
-Write-Host "  ✏️  Whiteboard:      http://arch.local/whiteboard"
-Write-Host "  🔧 Traefik:         http://localhost:8080"
+Write-Host "    Dashboard:          http://${DOMAIN}"
+Write-Host "    Documentation:      http://${DOMAIN}/docs"
+Write-Host "    PlantUML Editor:    http://${DOMAIN}/plantuml"
+Write-Host "    Excalidraw:         http://${DOMAIN}/whiteboard"
+Write-Host "    Mermaid Live:       http://${DOMAIN}/mermaid"
+Write-Host "    Kroki:              http://${DOMAIN}/kroki"
+Write-Host "    Traefik Dashboard:  http://localhost:${TRAEFIK_PORT}"
 Write-Host ""
-Write-Host "Nützliche Befehle:"
+Write-Host "  Useful commands:" -ForegroundColor Cyan
 Write-Host ""
-Write-Host "  Status anzeigen:    docker-compose ps"
-Write-Host "  Logs anzeigen:      docker-compose logs -f"
-Write-Host "  Services stoppen:   docker-compose down"
-Write-Host "  Services neustarten: docker-compose restart"
+Write-Host "    Status:             $COMPOSE ps"
+Write-Host "    Logs:               $COMPOSE logs -f"
+Write-Host "    Stop:               $COMPOSE down"
+Write-Host "    Restart:            $COMPOSE restart"
+Write-Host "    Rebuild:            $COMPOSE up -d --build"
 Write-Host ""
-Write-Host "Weitere Informationen:"
+Write-Host "  Documentation:" -ForegroundColor Cyan
 Write-Host ""
-Write-Host "  📖 Runbook:         runbook.md"
-Write-Host "  📝 Dokumentation:   repo\docs\"
-Write-Host "  🎨 C4-Diagramme:    repo\c4\"
+Write-Host "    README:             README.md"
+Write-Host "    Changelog:          CHANGELOG.md"
+Write-Host "    Architecture docs:  repo\docs\"
+Write-Host "    C4 diagrams:        repo\c4\"
 Write-Host ""
-Write-Host "======================================================================"
+Write-Host "======================================================================" -ForegroundColor Cyan

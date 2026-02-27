@@ -1,257 +1,327 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# ==============================================================================
+# EKMP-C4 Architecture Visualization Environment - Setup Script (Bash)
+# ==============================================================================
+# Repository : https://github.com/JoZapf/EKMP-C4-arch-containerized-visualization-environment
+# License    : MIT
+# Author     : Jo Zapf
+# Since      : November 2025
+# Updated    : February 2026
+# ==============================================================================
+# This script prepares the environment for first-time deployment on Linux/macOS.
+# It checks prerequisites, creates required directories, validates the
+# configuration, and starts all Docker services.
+# ==============================================================================
 
-# EKMP-C4 ARCHITEKTUR VISUALISIERUNGS STACK - Setup Script
-# Dieses Script bereitet die Umgebung für den ersten Start vor
+set -e  # Exit on error
 
-set -e  # Exit bei Fehlern
+# --- Helper Functions --------------------------------------------------------
 
-# Farben für Output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
-NC='\033[0m' # No Color
+CYAN='\033[0;36m'
+NC='\033[0m'
 
-# Funktionen für farbigen Output
-info() {
-    echo -e "${BLUE}[INFO]${NC} $1"
+info()    { echo -e "${BLUE}[INFO]${NC} $1"; }
+ok()      { echo -e "${GREEN}[  OK]${NC} $1"; }
+warn()    { echo -e "${YELLOW}[WARN]${NC} $1"; }
+err()     { echo -e "${RED}[ ERR]${NC} $1"; }
+
+# Detect docker compose command (V2 preferred)
+detect_compose() {
+    if docker compose version &>/dev/null; then
+        echo "docker compose"
+    elif command -v docker-compose &>/dev/null; then
+        echo "docker-compose"
+    else
+        echo ""
+    fi
 }
 
-success() {
-    echo -e "${GREEN}[SUCCESS]${NC} $1"
+# Read a value from .env file (simple key=value parser)
+env_val() {
+    local key="$1" default="$2"
+    if [[ -f .env ]]; then
+        local val
+        val=$(grep -E "^${key}=" .env 2>/dev/null | head -1 | cut -d'=' -f2- | xargs)
+        [[ -n "$val" ]] && echo "$val" && return
+    fi
+    echo "$default"
 }
 
-warning() {
-    echo -e "${YELLOW}[WARNING]${NC} $1"
-}
+# --- Main Script -------------------------------------------------------------
 
-error() {
-    echo -e "${RED}[ERROR]${NC} $1"
-}
-
-# Header
-echo "======================================================================"
-echo "  EMPC4 VIS Stack - Setup Script"
-echo "======================================================================"
+echo ""
+echo -e "${CYAN}======================================================================${NC}"
+echo -e "${CYAN}  EKMP-C4 Architecture Visualization Environment - Setup${NC}"
+echo -e "${CYAN}  Platform: Linux / macOS (Bash)${NC}"
+echo -e "${CYAN}======================================================================${NC}"
 echo ""
 
-# 1. Prüfe Voraussetzungen
-info "Prüfe Voraussetzungen..."
+# ---- 1. Prerequisites -------------------------------------------------------
 
-# Docker prüfen
-if ! command -v docker &> /dev/null; then
-    error "Docker ist nicht installiert!"
-    echo "Installiere Docker: https://docs.docker.com/get-docker/"
+info "Checking prerequisites..."
+
+# Docker
+if ! command -v docker &>/dev/null; then
+    err "Docker is not installed!"
+    echo "  Install Docker: https://docs.docker.com/get-docker/"
     exit 1
 fi
-success "Docker gefunden: $(docker --version)"
+ok "Docker found: $(docker --version)"
 
-# Docker Compose prüfen
-if ! command -v docker-compose &> /dev/null && ! docker compose version &> /dev/null; then
-    error "Docker Compose ist nicht installiert!"
-    echo "Installiere Docker Compose: https://docs.docker.com/compose/install/"
+# Docker Compose
+COMPOSE=$(detect_compose)
+if [[ -z "$COMPOSE" ]]; then
+    err "Docker Compose is not installed!"
+    echo "  Install Docker Compose: https://docs.docker.com/compose/install/"
     exit 1
 fi
-if command -v docker-compose &> /dev/null; then
-    success "Docker Compose gefunden: $(docker-compose --version)"
+ok "Docker Compose found: $($COMPOSE version 2>/dev/null || $COMPOSE --version 2>/dev/null)"
+
+# Git (optional)
+if command -v git &>/dev/null; then
+    ok "Git found: $(git --version)"
 else
-    success "Docker Compose gefunden: $(docker compose version)"
+    warn "Git not found - optional but recommended for version control"
 fi
 
-# 2. Erstelle .env wenn nicht vorhanden
-info "Prüfe .env Datei..."
-if [ ! -f .env ]; then
-    warning ".env nicht gefunden - erstelle aus .env.example"
-    cp .env.example .env
-    success ".env erstellt"
-    info "WICHTIG: Passe .env an deine Umgebung an!"
-else
-    success ".env bereits vorhanden"
-fi
+echo ""
 
-# 3. Prüfe Verzeichnisstruktur
-info "Prüfe Verzeichnisstruktur..."
+# ---- 2. Environment Configuration -------------------------------------------
 
-DIRS=("repo/docs" "repo/c4" "repo/assets/excalidraw" "dashboard/dist" "data/letsencrypt")
+info "Checking .env configuration..."
 
-for dir in "${DIRS[@]}"; do
-    if [ ! -d "$dir" ]; then
-        warning "Verzeichnis $dir nicht gefunden - erstelle..."
-        mkdir -p "$dir"
-        success "$dir erstellt"
-    fi
-done
-
-success "Verzeichnisstruktur vollständig"
-
-# 4. Prüfe /etc/hosts Eintrag
-info "Prüfe /etc/hosts für arch.local..."
-
-if grep -q "arch.local" /etc/hosts; then
-    success "arch.local in /etc/hosts gefunden"
-else
-    warning "arch.local nicht in /etc/hosts gefunden"
-    echo ""
-    echo "Füge folgenden Eintrag zu /etc/hosts hinzu:"
-    echo ""
-    echo "    127.0.0.1    arch.local"
-    echo ""
-    echo "Befehl (benötigt sudo):"
-    echo "    echo '127.0.0.1    arch.local' | sudo tee -a /etc/hosts"
-    echo ""
-
-    read -p "Soll ich das jetzt machen? (y/N): " -n 1 -r
-    echo
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
-        if echo "127.0.0.1    arch.local" | sudo tee -a /etc/hosts > /dev/null; then
-            success "arch.local zu /etc/hosts hinzugefügt"
-        else
-            error "Konnte arch.local nicht zu /etc/hosts hinzufügen"
-        fi
+if [[ ! -f .env ]]; then
+    if [[ -f .env.example ]]; then
+        warn ".env not found - creating from .env.example"
+        cp .env.example .env
+        ok ".env created"
+        echo ""
+        warn "IMPORTANT: Review and adjust .env for your environment!"
+        echo "  At minimum, set ARCH_BASE_DOMAIN to your hostname."
+        echo ""
     else
-        warning "Übersprungen - bitte manuell hinzufügen!"
-    fi
-fi
-
-# 5. Port-Check (falls verfügbar)
-info "Prüfe Port-Verfügbarkeit..."
-
-# Prüfe ob Python verfügbar ist
-if command -v python3 &> /dev/null || command -v python &> /dev/null; then
-    PYTHON_CMD="python3"
-    if ! command -v python3 &> /dev/null; then
-        PYTHON_CMD="python"
-    fi
-    
-    # Prüfe ob psutil verfügbar ist
-    if $PYTHON_CMD -c "import psutil" 2>/dev/null; then
-        info "Führe Port-Check aus..."
-        
-        if $PYTHON_CMD scripts/empc4_port_check.py --suggest-fixes; then
-            success "Alle Ports verfügbar"
-        else
-            error "Port-Konflikte gefunden!"
-            echo ""
-            warning "Löse die Port-Konflikte bevor du die Container startest."
-            echo "Tipps:"
-            echo "  1. Ändere Ports in .env (z.B. HTTP_PORT=8080)"
-            echo "  2. Stoppe belegende Services/Container"
-            echo ""
-            read -p "Trotzdem fortfahren? (y/N): " -n 1 -r
-            echo
-            if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-                error "Setup abgebrochen"
-                exit 1
-            fi
-            warning "Fahre fort trotz Port-Konflikten..."
-        fi
-    else
-        warning "psutil nicht installiert - Port-Check übersprungen"
-        info "Installiere mit: pip install psutil"
+        err ".env.example not found - cannot create .env"
+        echo "  Make sure you are running this script from the project root."
+        exit 1
     fi
 else
-    warning "Python nicht gefunden - Port-Check übersprungen"
+    ok ".env already exists"
 fi
 
-echo ""
+# Read configuration values
+DOMAIN=$(env_val "ARCH_BASE_DOMAIN" "arch.local")
+HTTP_PORT=$(env_val "HTTP_PORT" "80")
+TRAEFIK_PORT=$(env_val "TRAEFIK_DASHBOARD_PORT" "9090")
 
-# 6. Prüfe ob Container bereits laufen
-info "Prüfe laufende Container..."
+info "Configuration: ARCH_BASE_DOMAIN=$DOMAIN  HTTP_PORT=$HTTP_PORT  TRAEFIK_DASHBOARD_PORT=$TRAEFIK_PORT"
 
-if docker-compose ps 2>/dev/null | grep -q "Up" || docker compose ps 2>/dev/null | grep -q "running"; then
-    warning "Container laufen bereits!"
-    read -p "Soll ich die Container neu starten? (y/N): " -n 1 -r
-    echo
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
-        info "Stoppe Container..."
-        docker-compose down 2>/dev/null || docker compose down
-        success "Container gestoppt"
-    fi
-fi
+# ---- 3. Directory Structure --------------------------------------------------
 
-# 7. Pull Images
-info "Lade Docker Images..."
-if command -v docker-compose &> /dev/null; then
-    docker-compose pull
-else
-    docker compose pull
-fi
-success "Images geladen"
+info "Checking directory structure..."
 
-# 8. Starte Services
-info "Starte Services..."
-echo ""
-if command -v docker-compose &> /dev/null; then
-    docker-compose up -d
-else
-    docker compose up -d
-fi
-
-echo ""
-success "Services gestartet!"
-
-# 9. Warte auf Services
-info "Warte auf Service-Initialisierung..."
-sleep 10
-
-# 10. Prüfe Service-Status
-info "Prüfe Service-Status..."
-echo ""
-
-if command -v docker-compose &> /dev/null; then
-    docker-compose ps
-else
-    docker compose ps
-fi
-
-echo ""
-
-# 11. Teste Erreichbarkeit
-info "Teste Service-Erreichbarkeit..."
-
-SERVICES=(
-    "http://arch.local|Dashboard"
-    "http://arch.local/docs|Dokumentation"
-    "http://arch.local/plantuml|PlantUML"
-    "http://arch.local/whiteboard|Excalidraw"
-    "http://localhost:8080|Traefik Dashboard"
+REQUIRED_DIRS=(
+    "repo/docs"
+    "repo/c4"
+    "repo/assets/excalidraw"
+    "dashboard/dist"
+    "scripts"
 )
 
-for service in "${SERVICES[@]}"; do
-    IFS='|' read -r url name <<< "$service"
-
-    if curl -s -o /dev/null -w "%{http_code}" --max-time 5 "$url" | grep -q "200\|301\|302"; then
-        success "$name erreichbar: $url"
-    else
-        warning "$name nicht erreichbar: $url (kann noch initialisieren)"
+for dir in "${REQUIRED_DIRS[@]}"; do
+    if [[ ! -d "$dir" ]]; then
+        warn "Directory '$dir' missing - creating..."
+        mkdir -p "$dir"
+        ok "Created $dir"
     fi
 done
 
-# 12. Zusammenfassung
+ok "Directory structure complete"
 echo ""
-echo "======================================================================"
-echo "  Setup abgeschlossen!"
-echo "======================================================================"
+
+# ---- 4. Hosts File -----------------------------------------------------------
+
+info "Checking /etc/hosts for '$DOMAIN'..."
+
+if grep -q "$DOMAIN" /etc/hosts 2>/dev/null; then
+    ok "'$DOMAIN' found in /etc/hosts"
+else
+    warn "'$DOMAIN' not found in /etc/hosts"
+    echo ""
+    echo "  Add this line to /etc/hosts:"
+    echo ""
+    echo -e "    ${YELLOW}127.0.0.1    $DOMAIN${NC}"
+    echo ""
+
+    read -rp "  Add it now? (requires sudo) [y/N]: " response
+    if [[ "$response" =~ ^[Yy]$ ]]; then
+        if echo "127.0.0.1    $DOMAIN" | sudo tee -a /etc/hosts >/dev/null; then
+            ok "'$DOMAIN' added to /etc/hosts"
+        else
+            err "Could not modify /etc/hosts"
+        fi
+    else
+        warn "Skipped - please add the entry manually"
+    fi
+fi
+
 echo ""
-echo "Zugriff auf Services:"
+
+# ---- 5. Port Availability Check ----------------------------------------------
+
+info "Checking port availability..."
+
+PYTHON_CMD=""
+if command -v python3 &>/dev/null; then
+    PYTHON_CMD="python3"
+elif command -v python &>/dev/null; then
+    PYTHON_CMD="python"
+fi
+
+if [[ -n "$PYTHON_CMD" ]] && [[ -f "scripts/empc4_port_check.py" ]]; then
+    if $PYTHON_CMD -c "import psutil" 2>/dev/null; then
+        info "Running port check..."
+
+        if $PYTHON_CMD scripts/empc4_port_check.py --suggest-fixes; then
+            ok "All required ports available"
+        else
+            err "Port conflicts detected!"
+            echo ""
+            echo "  Options:"
+            echo "    1. Change ports in .env (e.g. HTTP_PORT=8080)"
+            echo "    2. Stop conflicting services/containers"
+            echo ""
+            read -rp "  Continue anyway? [y/N]: " response
+            if [[ ! "$response" =~ ^[Yy]$ ]]; then
+                err "Setup aborted"
+                exit 1
+            fi
+            warn "Continuing despite port conflicts..."
+        fi
+    else
+        warn "psutil not installed - port check skipped"
+        echo "  Install with: pip install psutil"
+    fi
+else
+    warn "Python or port check script not found - port check skipped"
+fi
+
 echo ""
-echo "  🏠 Dashboard:       http://arch.local"
-echo "  📚 Dokumentation:   http://arch.local/docs"
-echo "  🎨 PlantUML:        http://arch.local/plantuml"
-echo "  ✏️  Whiteboard:      http://arch.local/whiteboard"
-echo "  🔧 Traefik:         http://localhost:8080"
+
+# ---- 6. Running Container Check ---------------------------------------------
+
+info "Checking for running containers..."
+
+if $COMPOSE ps -q 2>/dev/null | grep -q .; then
+    warn "Containers are already running!"
+    read -rp "  Restart containers? [y/N]: " response
+    if [[ "$response" =~ ^[Yy]$ ]]; then
+        info "Stopping containers..."
+        $COMPOSE down
+        ok "Containers stopped"
+    fi
+fi
+
+# ---- 7. Pull & Build --------------------------------------------------------
+
+info "Pulling base images..."
+$COMPOSE pull --ignore-buildable
+ok "Base images pulled"
+
+info "Building custom images..."
+$COMPOSE build
+ok "Custom images built"
+
+# ---- 8. Start Services ------------------------------------------------------
+
 echo ""
-echo "Nützliche Befehle:"
+info "Starting services..."
+$COMPOSE up -d
+
 echo ""
-echo "  Status anzeigen:    docker-compose ps"
-echo "  Logs anzeigen:      docker-compose logs -f"
-echo "  Services stoppen:   docker-compose down"
-echo "  Services neustarten: docker-compose restart"
+ok "All services started!"
+
+# ---- 9. Wait for Initialization ----------------------------------------------
+
+info "Waiting for services to initialize (15s)..."
+sleep 15
+
+# ---- 10. Service Status ------------------------------------------------------
+
+info "Service status:"
 echo ""
-echo "Weitere Informationen:"
+$COMPOSE ps
 echo ""
-echo "  📖 Runbook:         runbook.md"
-echo "  📝 Dokumentation:   repo/docs/"
-echo "  🎨 C4-Diagramme:    repo/c4/"
+
+# ---- 11. Connectivity Tests --------------------------------------------------
+
+info "Testing service connectivity..."
+
+declare -A SERVICES=(
+    ["Dashboard"]="http://${DOMAIN}"
+    ["Documentation"]="http://${DOMAIN}/docs"
+    ["PlantUML Editor"]="http://${DOMAIN}/plantuml"
+    ["Excalidraw"]="http://${DOMAIN}/whiteboard"
+    ["Mermaid Live"]="http://${DOMAIN}/mermaid"
+    ["Kroki"]="http://${DOMAIN}/kroki"
+    ["Traefik Dashboard"]="http://localhost:${TRAEFIK_PORT}"
+)
+
+# Ordered service names for consistent output
+SERVICE_ORDER=(
+    "Dashboard"
+    "Documentation"
+    "PlantUML Editor"
+    "Excalidraw"
+    "Mermaid Live"
+    "Kroki"
+    "Traefik Dashboard"
+)
+
+for name in "${SERVICE_ORDER[@]}"; do
+    url="${SERVICES[$name]}"
+    http_code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 5 "$url" 2>/dev/null || echo "000")
+
+    if [[ "$http_code" =~ ^(200|301|302)$ ]]; then
+        ok "$name reachable: $url"
+    else
+        warn "$name not reachable: $url (may still be initializing)"
+    fi
+done
+
+# ---- 12. Summary -------------------------------------------------------------
+
 echo ""
-echo "======================================================================"
+echo -e "${CYAN}======================================================================${NC}"
+echo -e "${GREEN}  Setup Complete!${NC}"
+echo -e "${CYAN}======================================================================${NC}"
+echo ""
+echo -e "${CYAN}  Services:${NC}"
+echo ""
+echo "    Dashboard:          http://${DOMAIN}"
+echo "    Documentation:      http://${DOMAIN}/docs"
+echo "    PlantUML Editor:    http://${DOMAIN}/plantuml"
+echo "    Excalidraw:         http://${DOMAIN}/whiteboard"
+echo "    Mermaid Live:       http://${DOMAIN}/mermaid"
+echo "    Kroki:              http://${DOMAIN}/kroki"
+echo "    Traefik Dashboard:  http://localhost:${TRAEFIK_PORT}"
+echo ""
+echo -e "${CYAN}  Useful commands:${NC}"
+echo ""
+echo "    Status:             $COMPOSE ps"
+echo "    Logs:               $COMPOSE logs -f"
+echo "    Stop:               $COMPOSE down"
+echo "    Restart:            $COMPOSE restart"
+echo "    Rebuild:            $COMPOSE up -d --build"
+echo ""
+echo -e "${CYAN}  Documentation:${NC}"
+echo ""
+echo "    README:             README.md"
+echo "    Changelog:          CHANGELOG.md"
+echo "    Architecture docs:  repo/docs/"
+echo "    C4 diagrams:        repo/c4/"
+echo ""
+echo -e "${CYAN}======================================================================${NC}"
