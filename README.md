@@ -33,6 +33,7 @@
 - ⚡ **Instant updates** - see changes as they happen
 - ✅ **Opt-in by design** - no sync without consent
 - 🏗️ **Architecture Design** - [`docs/docu/`](docs/docu)
+
 Built with Flask-SocketIO + eventlet, integrated into the existing PlantUML Monaco Editor.
 
 **Privacy first:** Sync is OFF by default. Click the toggle button to enable collaboration.
