@@ -31,7 +31,7 @@
 - 👥 **Multi-device editing** - Windows, Linux, Mac
 - 🔒 **Self-hosted** - no cloud dependency
 - ⚡ **Instant updates** - see changes as they happen
-- ✅ **Opt-in by design** - no sync without explicit consent
+- ✅ **Opt-in by design** - no sync without consent
 - 🏗️ **Architecture Design** - [`docs/docu/`](docs/docu)
 Built with Flask-SocketIO + eventlet, integrated into the existing PlantUML Monaco Editor.
 
