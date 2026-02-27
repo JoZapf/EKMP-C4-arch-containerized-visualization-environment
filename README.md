@@ -32,7 +32,7 @@
 - 🔒 **Self-hosted** - no cloud dependency
 - ⚡ **Instant updates** - see changes as they happen
 - ✅ **Opt-in by design** - no sync without explicit consent
-
+- 🏗️ **Architecture Design** - [`docs/docu/`](docs/docu)
 Built with Flask-SocketIO + eventlet, integrated into the existing PlantUML Monaco Editor.
 
 **Privacy first:** Sync is OFF by default. Click the toggle button to enable collaboration.
@@ -123,7 +123,7 @@ cd EMPC4-containerized-visualization-environment
 
 ```
 ┌──────────────────────────────────────────────────────────┐
-│                    Host: arch.local                       │
+│                    Host: arch.local                      │
 │  ┌────────────────────────────────────────────────────┐  │
 │  │              Traefik Reverse Proxy                 │  │
 │  │         PathPrefix Routing + Health Checks         │  │
@@ -131,9 +131,9 @@ cd EMPC4-containerized-visualization-environment
 │           /uml    /mermaid   /whiteboard   /kroki        │
 │             │         │          │           │           │
 │  ┌──────────┴─────────┴──────────┴───────────┴────────┐  │
-│  │                  Docker Network                     │  │
+│  │                  Docker Network                    │  │
 │  │  ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐   │  │
-│  │  │PlantUML │ │ Mermaid │ │Excalidraw│ │  Kroki  │   │  │
+│  │  │PlantUML │ │ Mermaid │ │Excalidraw││  Kroki  │   │  │
 │  │  │ +Sync   │ │  Live   │ │         │ │+Backends│   │  │
 │  │  └─────────┘ └─────────┘ └─────────┘ └─────────┘   │  │
 │  └────────────────────────────────────────────────────┘  │
